@@ -1,0 +1,10 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-generate",
+      "schedule": "0 6 * * *"
+    }
+  ],
+  "framework": "nextjs",
+  "regions": ["iad1"]
+}
