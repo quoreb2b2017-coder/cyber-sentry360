@@ -19,19 +19,25 @@ export const SEO_LIMITS = {
 
 type LimitKey = keyof typeof SEO_LIMITS;
 
-/** Replace long em/en dashes with ASCII hyphen. */
+/** Replace long em/en dashes with ASCII hyphen (single line). */
 export function normalizeDashes(value: unknown): string {
   if (value == null) return '';
+  return String(value).replace(/\s*[\u2014\u2013]\s*/g, ' - ');
+}
+
+/** Replace dashes in markdown/multiline text without destroying line breaks. */
+export function normalizeDashesMultiline(value: unknown): string {
+  if (value == null) return '';
   return String(value)
-    .replace(/\s*[\u2014\u2013]\s*/g, ' - ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+    .split(/\r?\n/)
+    .map((line) => normalizeDashes(line).replace(/[^\S]+/g, ' ').trim())
+    .join('\n');
 }
 
 /** Trim and cut at word boundary when possible (never exceed max). */
 export function clampText(value: unknown, max: number, min = 0): string {
   if (value == null) return '';
-  let text = normalizeDashes(String(value).replace(/\s+/g, ' ').trim());
+  let text = normalizeDashes(String(value).replace(/[^\S\r\n]+/g, ' ').trim());
   if (!text) return '';
 
   if (text.length > max) {

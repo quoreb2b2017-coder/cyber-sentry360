@@ -8,6 +8,7 @@ import {
 } from './prompts';
 import { buildCombinedSchema, imageFilename, webpFilename } from './seo';
 import { sanitizeSeoFields } from './meta';
+import { sanitizeArticleMarkdown } from './markdown-inline';
 import { slugify, calcReadingTime, deskHeroImage } from '../posts';
 import type { AutomationSettings, GeneratedArticle, Post, Service } from '../types';
 
@@ -206,7 +207,7 @@ export async function generateArticleForService(
     title: seo.title,
     subtitle: seo.subtitle,
     slug: uniqueSlug,
-    content: generated.content,
+    content: sanitizeArticleMarkdown(generated.content),
     excerpt: seo.excerpt,
     status: shouldPublish ? 'published' : 'draft',
     category: service.slug,
@@ -324,7 +325,7 @@ export async function generateManualArticle(params: {
     title: seo.title,
     subtitle: seo.subtitle,
     slug,
-    content: generated.content,
+    content: sanitizeArticleMarkdown(generated.content),
     excerpt: seo.excerpt,
     status: shouldPublish ? 'published' : 'draft',
     category: params.category,

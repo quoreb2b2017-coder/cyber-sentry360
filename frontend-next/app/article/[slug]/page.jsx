@@ -164,8 +164,8 @@ export default function ArticlePage() {
           </figure>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
-          <div className="lg:col-span-8 min-w-0 order-2 lg:order-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 w-full items-start">
+          <div className="lg:col-span-8 w-full min-w-0 order-2 lg:order-1">
             <div className="lg:hidden mb-4">
               <TableOfContents content={article.body} items={article.table_of_contents} defaultOpen compact />
             </div>
@@ -205,7 +205,7 @@ export default function ArticlePage() {
             </div>
           </div>
 
-          <aside className="lg:col-span-4 space-y-3 lg:sticky lg:top-[4.5rem] lg:self-start order-1 lg:order-2 z-10 min-w-0 overflow-x-hidden">
+          <aside className="lg:col-span-4 space-y-3 order-1 lg:order-2 lg:sticky lg:top-16 lg:self-start z-10 min-w-0">
             <div className="hidden lg:block">
               <TableOfContents content={article.body} items={article.table_of_contents} defaultOpen compact />
             </div>

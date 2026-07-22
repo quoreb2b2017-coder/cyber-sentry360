@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { List } from 'lucide-react';
+import { stripMarkdown } from '@/lib/content/markdown-inline';
 
 function slugify(text) {
   return String(text)
@@ -61,7 +62,7 @@ export default function TableOfContents({ content, items, defaultOpen = true, co
         </span>
       </button>
       {open && (
-        <nav className="p-1 max-h-[220px] overflow-auto">
+        <nav className="p-1 max-h-[min(220px,calc(100vh-22rem))] overflow-y-auto overscroll-contain">
           {headings.map((h, i) => (
             <a
               key={h.id || i}
@@ -78,7 +79,7 @@ export default function TableOfContents({ content, items, defaultOpen = true, co
               }`}
             >
               <span className="text-primary/60 shrink-0 font-mono text-[10px]">{String(i + 1).padStart(2, '0')}</span>
-              <span className="leading-snug font-sans">{h.title}</span>
+              <span className="leading-snug font-sans">{stripMarkdown(h.title)}</span>
             </a>
           ))}
         </nav>

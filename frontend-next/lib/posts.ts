@@ -1,5 +1,5 @@
 import type { Post, ArticleDTO } from './types';
-import { normalizeDashes } from './content/meta';
+import { normalizeDashes, normalizeDashesMultiline } from './content/meta';
 
 /** Columns for card/list endpoints — never pull full article body */
 export const POST_LIST_COLUMNS =
@@ -13,7 +13,7 @@ export function toArticleDTO(post: Post | Record<string, unknown>, { includeBody
     title: normalizeDashes(p.title),
     subtitle: p.subtitle ? normalizeDashes(p.subtitle) : p.subtitle,
     slug: p.slug,
-    body: includeBody ? normalizeDashes(p.content || '') : '',
+    body: includeBody ? normalizeDashesMultiline(p.content || '') : '',
     category: p.category || '',
     tags: p.tags || [],
     keywords: p.keywords || [],

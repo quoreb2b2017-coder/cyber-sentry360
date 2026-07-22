@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { toArticleDTO, calcReadingTime } from '@/lib/posts';
 import { sanitizeSeoFields, validateSeoInput, clampText } from '@/lib/content/meta';
+import { sanitizeArticleMarkdown } from '@/lib/content/markdown-inline';
 import { requireApiAuth } from '@/lib/api-auth';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -104,8 +105,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 
   if (body.body !== undefined) {
-    updates.content = body.body;
-    updates.reading_time = calcReadingTime(body.body);
+    updates.content = sanitizeArticleMarkdown(body.body);
+    updates.reading_time = calcReadingTime(String(body.body));
   }
   if (body.category !== undefined) updates.category = body.category;
   if (body.hero_image !== undefined) updates.featured_image = body.hero_image;

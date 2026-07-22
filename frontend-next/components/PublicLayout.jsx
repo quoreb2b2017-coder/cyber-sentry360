@@ -24,8 +24,8 @@ function Ticker() {
   if (!items.length) return null;
   const tape = [...items, ...items];
   return (
-    <div className="border-b-2 border-foreground bg-foreground text-background overflow-hidden group/ticker" data-testid="ticker">
-      <div className="flex gap-8 whitespace-nowrap animate-ticker py-1.5 font-mono text-[10px] uppercase tracking-widest group-hover/ticker:[animation-play-state:paused]">
+    <div className="w-full border-b-2 border-foreground bg-foreground text-background overflow-hidden max-h-8 group/ticker" data-testid="ticker">
+      <div className="inline-flex w-max min-w-full gap-8 whitespace-nowrap animate-ticker py-1.5 px-4 font-mono text-[10px] uppercase tracking-widest group-hover/ticker:[animation-play-state:paused]">
         {tape.map((a, i) => (
           <Link
             key={`${a.slug}-${i}`}
@@ -108,7 +108,7 @@ export default function PublicLayout({ children }) {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden max-w-[100vw]">
+    <div className="min-h-screen flex flex-col w-full">
       <Suspense fallback={null}>
         <RouteChangeSpinner />
       </Suspense>
@@ -190,7 +190,7 @@ export default function PublicLayout({ children }) {
         )}
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 w-full min-w-0">{children}</main>
 
       <footer className="border-t-2 border-foreground bg-foreground text-background mt-8">
         <div className="max-w-[1200px] mx-auto px-5 py-10 md:py-12">

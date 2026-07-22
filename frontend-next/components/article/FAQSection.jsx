@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { inlineFormat, stripMarkdown } from '@/lib/content/markdown-inline';
 
 export default function FAQSection({ faq }) {
   const [open, setOpen] = useState(-1);
@@ -23,15 +24,15 @@ export default function FAQSection({ faq }) {
                 className="w-full flex items-start justify-between gap-3 px-3.5 py-3 text-left hover:bg-muted transition-colors group"
               >
                 <span className="font-heading font-bold text-sm leading-snug group-hover:text-primary">
-                  {item.question}
+                  {stripMarkdown(item.question)}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`}
                 />
               </button>
               {isOpen && (
-                <p className="px-3.5 pb-3 text-sm leading-relaxed text-muted-foreground border-t border-muted pt-2">
-                  {item.answer}
+                <p className="px-3.5 pb-3 text-sm leading-relaxed text-foreground/85 border-t border-muted pt-2">
+                  {inlineFormat(item.answer, `faq-${i}`)}
                 </p>
               )}
             </div>
