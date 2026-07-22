@@ -13,6 +13,7 @@ STRICT RULES:
 - Follow Google Helpful Content and E-E-A-T guidelines.
 - Include Experience (first-hand practitioner insights), Expertise (technical depth), Authority (cite frameworks/standards), Trust (acknowledge trade-offs and limitations).
 - Never use phrases like "In today's digital landscape", "In conclusion", "It's important to note", "delve", "leverage", "utilize", "comprehensive guide", "game-changer", "robust", "cutting-edge".
+- Use ASCII hyphen (-) with spaces for breaks in titles/subtitles (e.g. "topic - detail"). Never use em dash (—) or en dash (–).
 - Write as if you've interviewed practitioners and reviewed primary sources.
 - Include a "## What to Watch" section near the end with 3-4 forward-looking bullet points.
 

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { normalizeDashes } from '@/lib/content/meta';
 
 function slugify(text) {
   return String(text)
@@ -70,7 +71,7 @@ function parseTable(lines, startIdx) {
 export default function ArticleContent({ content }) {
   if (!content) return null;
 
-  const lines = content.split(/\r?\n/);
+  const lines = normalizeDashes(content).split(/\r?\n/);
   const out = [];
   let list = null;
   let listType = 'ul';

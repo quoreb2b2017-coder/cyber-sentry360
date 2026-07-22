@@ -47,7 +47,7 @@ export default function HomePage() {
               <Search className="w-3.5 h-3.5" /> Search archive
             </Link>
           </div>
-          <p className="mt-3 font-serif italic text-sm md:text-base text-muted-foreground max-w-lg leading-snug">
+          <p className="mt-3 lead-muted max-w-lg">
             Rigorous AI &amp; cybersecurity reporting for builders and CISOs.
           </p>
         </header>
@@ -64,7 +64,7 @@ export default function HomePage() {
           <div className="brutal-border bg-card p-10 text-center my-6">
             <Newspaper className="w-8 h-8 text-primary mx-auto mb-4" />
             <h2 className="font-heading font-black uppercase text-2xl tracking-tighter mb-2">No stories yet</h2>
-            <p className="text-sm text-muted-foreground mb-5">Publish from the newsroom to fill this grid.</p>
+            <p className="text-caption mb-5">Publish from the newsroom to fill this grid.</p>
             <Link href="/admin/generate" className="brutal-btn-primary text-[10px]">
               Draft with AI →
             </Link>
@@ -137,14 +137,14 @@ export default function HomePage() {
               </section>
 
               <section
-                className="lg:col-span-2 border-2 border-foreground bg-foreground text-background p-5 flex flex-col justify-center"
+                className="lg:col-span-2 min-w-0 max-w-full overflow-x-hidden border-2 border-foreground bg-foreground text-background p-5 flex flex-col justify-center"
                 data-testid="hero-newsletter"
               >
                 <div className="overline text-primary mb-2">Weekly brief</div>
                 <h2 className="font-heading font-black uppercase text-xl tracking-tight leading-none mb-2">
                   CISOs read this on Tuesday
                 </h2>
-                <p className="font-serif italic text-sm text-background/70 mb-4">One dispatch. Zero fluff.</p>
+                <p className="font-serif italic text-sm text-background/90 mb-4">One dispatch. Zero fluff.</p>
                 <NewsletterSubscribe variant="footer" testid="hero-newsletter" />
               </section>
             </div>

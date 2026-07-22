@@ -1,4 +1,5 @@
 import type { Post, ArticleDTO } from './types';
+import { normalizeDashes } from './content/meta';
 
 /** Columns for card/list endpoints — never pull full article body */
 export const POST_LIST_COLUMNS =
@@ -9,25 +10,25 @@ export function toArticleDTO(post: Post | Record<string, unknown>, { includeBody
   const p = post as Post;
   return {
     id: p.id,
-    title: p.title,
-    subtitle: p.subtitle,
+    title: normalizeDashes(p.title),
+    subtitle: p.subtitle ? normalizeDashes(p.subtitle) : p.subtitle,
     slug: p.slug,
-    body: includeBody ? (p.content || '') : '',
+    body: includeBody ? normalizeDashes(p.content || '') : '',
     category: p.category || '',
     tags: p.tags || [],
     keywords: p.keywords || [],
     hero_image: p.featured_image,
     author: p.author,
     status: p.status,
-    seo_title: p.seo_title || p.meta_title,
-    meta_title: p.meta_title || p.seo_title,
-    seo_description: p.meta_description,
-    excerpt: p.excerpt,
+    seo_title: normalizeDashes(p.seo_title || p.meta_title),
+    meta_title: normalizeDashes(p.meta_title || p.seo_title),
+    seo_description: normalizeDashes(p.meta_description),
+    excerpt: normalizeDashes(p.excerpt),
     focus_keyword: p.focus_keyword,
-    og_title: p.og_title,
-    og_description: p.og_description,
-    twitter_title: p.twitter_title,
-    twitter_description: p.twitter_description,
+    og_title: normalizeDashes(p.og_title),
+    og_description: normalizeDashes(p.og_description),
+    twitter_title: normalizeDashes(p.twitter_title),
+    twitter_description: normalizeDashes(p.twitter_description),
     reading_time: p.reading_time,
     views: p.views,
     published_at: p.published_at,

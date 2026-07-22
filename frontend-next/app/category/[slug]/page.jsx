@@ -38,7 +38,7 @@ export default function CategoryPage() {
     <PublicLayout>
       <div className="max-w-[1200px] mx-auto px-5 pb-12" data-testid="category-page">
         <header className="border-b-2 border-foreground py-5">
-          <Link href="/" prefetch className="inline-flex items-center gap-1.5 overline text-muted-foreground hover:text-primary mb-3">
+          <Link href="/" prefetch className="inline-flex items-center gap-1.5 overline text-foreground/70 hover:text-primary mb-3">
             <ArrowLeft className="w-3 h-3" /> Home
           </Link>
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -48,7 +48,7 @@ export default function CategoryPage() {
                 {title}
               </h1>
               {blurb && (
-                <p className="mt-3 font-serif italic text-base md:text-lg text-muted-foreground max-w-xl leading-snug">
+                <p className="mt-3 lead-muted md:text-xl max-w-xl">
                   {blurb}
                 </p>
               )}
@@ -79,7 +79,7 @@ export default function CategoryPage() {
               <h2 className="font-heading font-black uppercase text-xl tracking-tighter mb-2">
                 No stories on this desk yet
               </h2>
-              <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
+              <p className="text-caption mb-5 max-w-md mx-auto">
                 Daily automation will publish here when this desk is next in rotation - or draft one now.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
@@ -118,7 +118,7 @@ export default function CategoryPage() {
                 className="brutal-border bg-card px-3 py-3 hover:bg-muted hover:shadow-brutal-sm transition-shadow duration-100 group"
               >
                 <div className="font-heading font-bold uppercase text-sm group-hover:text-primary">{d.name}</div>
-                <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground mt-1 line-clamp-1">
+                <div className="font-mono text-[9px] uppercase tracking-wider text-foreground/70 mt-1 line-clamp-1">
                   {d.blurb}
                 </div>
               </Link>

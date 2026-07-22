@@ -97,7 +97,7 @@ export default function ArticlePage() {
       <ReadingProgress />
 
       <article className="max-w-[1100px] mx-auto px-5 py-4 md:py-5" data-testid="article-page">
-        <nav className="flex flex-wrap items-center gap-1.5 overline text-[10px] text-muted-foreground mb-3">
+        <nav className="flex flex-wrap items-center gap-1.5 overline text-xs mb-3">
           <Link href="/" prefetch className="hover:text-primary">Home</Link>
           <span>/</span>
           <Link href={`/category/${article.category}`} prefetch className="hover:text-primary capitalize" data-testid="back-to-category">
@@ -126,13 +126,13 @@ export default function ArticlePage() {
           </h1>
 
           {article.subtitle && (
-            <p className="mt-2.5 font-serif italic text-base md:text-lg text-muted-foreground leading-snug max-w-3xl line-clamp-3">
+            <p className="mt-2.5 article-subtitle max-w-3xl line-clamp-3">
               {article.subtitle}
             </p>
           )}
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-foreground/85 uppercase tracking-wider">
               <span className="text-foreground">{article.author}</span>
               <span>{formatDate(article.published_at || article.created_at)}</span>
             </div>
@@ -205,7 +205,7 @@ export default function ArticlePage() {
             </div>
           </div>
 
-          <aside className="lg:col-span-4 space-y-3 lg:sticky lg:top-[4.5rem] lg:self-start order-1 lg:order-2 z-10">
+          <aside className="lg:col-span-4 space-y-3 lg:sticky lg:top-[4.5rem] lg:self-start order-1 lg:order-2 z-10 min-w-0 overflow-x-hidden">
             <div className="hidden lg:block">
               <TableOfContents content={article.body} items={article.table_of_contents} defaultOpen compact />
             </div>

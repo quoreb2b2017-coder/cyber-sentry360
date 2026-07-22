@@ -13,7 +13,7 @@
     --secondary: 213 49% 23%;
     --secondary-foreground: 0 0% 100%;
     --muted: 60 8% 89%;
-    --muted-foreground: 0 0% 35%;
+    --muted-foreground: 0 0% 15%;
     --accent: 42 100% 50%;
     --accent-foreground: 0 0% 4%;
     --destructive: 355 78% 56%;
@@ -32,6 +32,8 @@
     color: hsl(var(--foreground));
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   a, button, [role="button"], summary, label[for] {
     cursor: pointer;
@@ -52,7 +54,17 @@
   .brutal-btn:disabled { @apply opacity-60 cursor-not-allowed; }
   .brutal-btn-primary { @apply brutal-btn bg-primary text-primary-foreground; }
   .brutal-btn-primary:hover:not(:disabled) { box-shadow: 3px 3px 0 0 #0A0A0A; }
-  .overline { @apply font-mono text-xs uppercase tracking-[0.2em]; }
+  .overline { @apply font-mono text-sm uppercase tracking-[0.2em]; }
+  .lead-muted {
+    @apply font-serif italic font-semibold text-foreground text-base md:text-lg leading-snug;
+  }
+  .article-subtitle {
+    @apply font-serif italic font-semibold text-foreground text-lg md:text-xl leading-snug;
+    color: hsl(var(--foreground));
+  }
+  .text-caption {
+    @apply text-base text-foreground/85;
+  }
   .tag-chip {
     @apply inline-block border border-foreground bg-white px-2 py-1 font-mono text-[10px] uppercase tracking-wider cursor-pointer hover:bg-foreground hover:text-white transition-colors duration-100;
   }

@@ -108,7 +108,7 @@ export default function PublicLayout({ children }) {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden max-w-[100vw]">
       <Suspense fallback={null}>
         <RouteChangeSpinner />
       </Suspense>
@@ -199,7 +199,7 @@ export default function PublicLayout({ children }) {
               <Link href="/" className="font-heading font-black text-2xl tracking-tighter inline-block">
                 cybersentry<span className="text-primary">360</span>
               </Link>
-              <p className="mt-3 font-serif italic text-base text-background/75 leading-snug max-w-xs">
+              <p className="mt-3 font-serif italic text-base text-background/90 leading-snug max-w-xs">
                 Editorial intelligence for the AI &amp; cybersecurity era.
               </p>
             </div>
@@ -228,16 +228,16 @@ export default function PublicLayout({ children }) {
               </ul>
             </div>
 
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 min-w-0 max-w-full overflow-x-hidden">
               <div className="overline text-primary mb-3">Weekly brief</div>
-              <p className="text-sm mb-3 text-background/70 leading-snug">One dispatch every Tuesday. No fluff.</p>
+              <p className="text-sm mb-3 text-background/90 leading-snug">One dispatch every Tuesday. No fluff.</p>
               <NewsletterSubscribe variant="footer" testid="footer-newsletter" />
             </div>
           </div>
         </div>
 
         <div className="border-t border-background/20">
-          <div className="max-w-[1200px] mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/50">
+          <div className="max-w-[1200px] mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/70">
             <span>© {new Date().getFullYear()} cybersentry360</span>
             <span>Plagiarism-free · Independent · Human-reviewed</span>
           </div>

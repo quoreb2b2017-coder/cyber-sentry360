@@ -39,7 +39,7 @@ export function ArticleCard({ a, showCategory = true }) {
         </div>
         <div className="p-3.5 flex flex-col flex-1">
           <div className="mb-1.5">
-            <span className="overline text-muted-foreground text-[9px]">
+            <span className="overline text-foreground/85 text-xs">
               {formatDate(a.published_at || a.created_at)}
             </span>
           </div>
@@ -47,11 +47,11 @@ export function ArticleCard({ a, showCategory = true }) {
             {a.title}
           </h3>
           {a.subtitle && (
-            <p className="mt-1.5 font-serif italic text-sm text-muted-foreground leading-snug line-clamp-2">
+            <p className="mt-1.5 font-serif italic font-semibold text-base text-foreground leading-snug line-clamp-2">
               {a.subtitle}
             </p>
           )}
-          <div className="mt-auto pt-3 overline text-[9px] inline-flex items-center gap-1.5 text-muted-foreground group-hover:text-primary">
+          <div className="mt-auto pt-3 overline text-xs inline-flex items-center gap-1.5 text-foreground/85 group-hover:text-primary">
             Read <ArrowRight className="w-3 h-3" />
           </div>
         </div>

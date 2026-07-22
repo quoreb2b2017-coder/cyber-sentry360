@@ -80,9 +80,9 @@ export function NewsletterSubscribe({
   if (variant === 'footer') {
     if (subscribed) {
       return (
-        <div className="space-y-2" data-testid={`${testid}-unsub`}>
-          <p className="text-sm text-background/70 leading-snug">
-            Subscribed as <span className="text-background font-mono text-xs">{email}</span>
+        <div className="w-full min-w-0 max-w-full space-y-2" data-testid={`${testid}-unsub`}>
+          <p className="text-sm text-background/70 leading-snug break-words">
+            Subscribed as <span className="text-background font-mono text-xs break-all">{email}</span>
           </p>
           <button
             type="button"
@@ -98,20 +98,24 @@ export function NewsletterSubscribe({
     }
 
     return (
-      <form onSubmit={subscribe} className="flex border-2 border-background" data-testid={`${testid}-form`}>
+      <form
+        onSubmit={subscribe}
+        className="flex w-full min-w-0 max-w-full overflow-hidden border-2 border-background"
+        data-testid={`${testid}-form`}
+      >
         <input
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
-          className="flex-1 min-w-0 px-3 py-2.5 bg-transparent text-background placeholder:text-background/45 font-mono text-xs focus:outline-none border-r-2 border-background"
+          className="flex-1 min-w-0 max-w-full px-3 py-2.5 bg-transparent text-background placeholder:text-background/45 font-mono text-xs focus:outline-none border-r-2 border-background"
           data-testid={`${testid}-email`}
         />
         <button
           type="submit"
           disabled={busy}
-          className="bg-primary text-primary-foreground font-mono text-[10px] uppercase tracking-widest px-4 hover:bg-primary/90 cursor-pointer disabled:opacity-60"
+          className="shrink-0 bg-primary text-primary-foreground font-mono text-[10px] uppercase tracking-widest px-3 sm:px-4 hover:bg-primary/90 cursor-pointer disabled:opacity-60"
           data-testid={`${testid}-submit`}
         >
           {busy ? '…' : 'Join'}
@@ -121,19 +125,19 @@ export function NewsletterSubscribe({
   }
 
   return (
-    <div className="brutal-border bg-card overflow-hidden" data-testid={`${testid}-box`}>
+    <div className="brutal-border bg-card w-full min-w-0 max-w-full overflow-x-hidden" data-testid={`${testid}-box`}>
       <div className="border-b-2 border-foreground px-3 py-2 bg-muted">
         <div className="overline text-primary text-[9px] inline-flex items-center gap-1.5">
-          <Mail className="w-3 h-3" />
+          <Mail className="w-3 h-3 shrink-0" />
           {subscribed ? 'Subscribed' : 'Subscribe now'}
         </div>
       </div>
-      <div className="p-3 space-y-2.5">
+      <div className="p-3 space-y-2.5 min-w-0 overflow-x-hidden">
         {subscribed ? (
           <>
-            <p className="font-serif italic text-xs text-muted-foreground leading-snug">
+            <p className="font-serif italic text-sm text-foreground/85 leading-snug">
               You&apos;re on the list as{' '}
-              <span className="font-mono text-[10px] not-italic text-foreground break-all">{email}</span>
+              <span className="font-mono text-xs not-italic text-foreground break-all">{email}</span>
             </p>
             <button
               type="button"
@@ -150,29 +154,29 @@ export function NewsletterSubscribe({
                 'Unsubscribe'
               )}
             </button>
-            <p className="font-mono text-[9px] text-muted-foreground text-center uppercase tracking-wider">
+            <p className="font-mono text-[9px] text-foreground/65 text-center uppercase tracking-wider">
               You can re-subscribe anytime
             </p>
           </>
         ) : (
           <>
-            <p className="font-serif italic text-xs text-muted-foreground leading-snug">
+            <p className="font-serif italic text-sm text-foreground/85 leading-snug">
               One Tuesday brief. Zero fluff. For CISOs &amp; builders.
             </p>
-            <form onSubmit={subscribe} className="space-y-2">
+            <form onSubmit={subscribe} className="space-y-2 w-full min-w-0 max-w-full overflow-x-hidden">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full border-2 border-foreground px-2.5 py-2 font-mono text-xs bg-background focus:outline-none"
+                className="block w-full min-w-0 max-w-full box-border border-2 border-foreground px-2.5 py-2 font-mono text-xs bg-background focus:outline-none focus:ring-0"
                 data-testid={`${testid}-email`}
               />
               <button
                 type="submit"
                 disabled={busy}
-                className="brutal-btn-primary w-full py-2 text-[10px]"
+                className="brutal-btn-primary w-full max-w-full py-2 text-[10px]"
                 data-testid={`${testid}-submit`}
               >
                 {busy ? 'Joining…' : 'Subscribe now →'}

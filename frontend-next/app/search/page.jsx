@@ -173,7 +173,7 @@ function SearchContent() {
                   {a.title}
                 </div>
                 {a.subtitle && (
-                  <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">{a.subtitle}</p>
+                  <p className="mt-1.5 text-base font-serif italic font-semibold text-foreground line-clamp-2">{a.subtitle}</p>
                 )}
               </div>
             </Link>
