@@ -33,6 +33,5 @@ next-env.d.ts
 coverage/
 .vercel
 
-# Generated during build — do not commit
+# Generated at build (sitemap-data module only)
 lib/seo/sitemap-data.ts
-public/sitemap.xml
