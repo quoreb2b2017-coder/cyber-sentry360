@@ -1,5 +1,2 @@
-# Generated at build — do not commit
-lib/seo/sitemap-xml.ts
-lib/seo/sitemap-data.ts
-public/sitemap.xml
-public/google-sitemap.xml
+# Generated at build (also committed as fallback)
+# lib/seo/sitemap-xml.ts
