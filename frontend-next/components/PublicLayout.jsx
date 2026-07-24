@@ -24,8 +24,8 @@ function Ticker() {
   if (!items.length) return null;
   const tape = [...items, ...items];
   return (
-    <div className="w-full border-b border-foreground/20 bg-foreground text-background overflow-hidden group/ticker" data-testid="ticker">
-      <div className="inline-flex w-max min-w-full gap-10 whitespace-nowrap animate-ticker py-2 px-5 font-mono text-[9px] uppercase tracking-[0.2em] group-hover/ticker:[animation-play-state:paused]">
+    <div className="w-full border-b-2 border-foreground bg-foreground text-background overflow-hidden max-h-8 group/ticker" data-testid="ticker">
+      <div className="inline-flex w-max min-w-full gap-8 whitespace-nowrap animate-ticker py-1.5 px-4 font-mono text-[10px] uppercase tracking-widest group-hover/ticker:[animation-play-state:paused]">
         {tape.map((a, i) => (
           <Link
             key={`${a.slug}-${i}`}
@@ -63,7 +63,7 @@ function HeaderSearch() {
   return (
     <div className="relative flex items-center">
       {open ? (
-        <form onSubmit={submit} className="flex items-stretch border border-foreground/30 bg-background absolute right-0 top-1/2 -translate-y-1/2 z-50 w-[min(300px,72vw)] shadow-lg rounded-sm overflow-hidden">
+        <form onSubmit={submit} className="flex items-stretch border-2 border-foreground bg-background absolute right-0 top-1/2 -translate-y-1/2 z-50 w-[min(320px,70vw)] shadow-brutal-sm">
           <input
             ref={inputRef}
             value={q}
@@ -88,7 +88,7 @@ function HeaderSearch() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="p-2 border border-foreground/25 hover:bg-muted hover:border-foreground/50 transition-colors rounded-sm"
+          className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
           data-testid="header-search-btn"
           aria-label="Open search"
         >
@@ -114,18 +114,18 @@ export default function PublicLayout({ children }) {
       </Suspense>
       <Ticker />
 
-      <header className="border-b border-foreground/20 bg-background/95 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 h-14 md:h-[60px] flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-baseline gap-0 shrink-0 relative z-10" data-testid="brand-link">
-            <span className="font-heading font-black text-lg md:text-xl tracking-tight">cybersentry</span>
-            <span className="text-primary font-heading font-black text-lg md:text-xl">360</span>
+      <header className="border-b-2 border-foreground bg-background sticky top-0 z-50">
+        <div className="max-w-[1200px] mx-auto px-5 h-14 md:h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-baseline gap-0.5 shrink-0 relative z-10" data-testid="brand-link">
+            <span className="font-heading font-black text-xl md:text-2xl tracking-tighter">cybersentry</span>
+            <span className="text-primary font-heading font-black text-xl md:text-2xl">360</span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-0.5 font-mono text-[10px] uppercase tracking-widest relative z-10" data-testid="main-nav">
+          <nav className="hidden lg:flex items-center gap-1 font-mono text-[11px] uppercase tracking-widest relative z-10" data-testid="main-nav">
             <Link
               href="/"
               prefetch
-              className={`px-3 py-2 rounded-sm hover:bg-muted transition-colors ${pathname === '/' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`px-3 py-1.5 hover:text-primary transition-colors duration-100 ${pathname === '/' ? 'text-primary' : ''}`}
             >
               Home
             </Link>
@@ -134,8 +134,8 @@ export default function PublicLayout({ children }) {
                 key={c.slug}
                 href={`/category/${c.slug}`}
                 prefetch
-                className={`px-3 py-2 rounded-sm transition-colors ${
-                  pathname === `/category/${c.slug}` ? 'text-primary font-medium bg-muted' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                className={`px-3 py-1.5 hover:text-primary transition-colors duration-100 ${
+                  pathname === `/category/${c.slug}` ? 'text-primary border-b-2 border-primary' : ''
                 }`}
                 data-testid={`nav-${c.slug}`}
               >
@@ -148,7 +148,7 @@ export default function PublicLayout({ children }) {
             <HeaderSearch />
             <Link
               href="/admin/login"
-              className="hidden sm:inline-flex text-[10px] font-mono uppercase tracking-widest px-3 py-2 border border-foreground/25 hover:border-foreground hover:bg-muted transition-colors"
+              className="hidden sm:inline-flex brutal-btn text-[10px] px-3 py-2"
               data-testid="header-admin-btn"
             >
               Editor
@@ -166,8 +166,8 @@ export default function PublicLayout({ children }) {
         </div>
 
         {mobileOpen && (
-          <div className="lg:hidden border-t border-foreground/20 bg-background">
-            <nav className="max-w-[1180px] mx-auto px-4 sm:px-6 py-3 grid grid-cols-2 gap-1" data-testid="mobile-nav">
+          <div className="lg:hidden border-t-2 border-foreground bg-background">
+            <nav className="max-w-[1200px] mx-auto px-5 py-3 grid grid-cols-2 gap-1" data-testid="mobile-nav">
               <Link href="/" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
                 Home
               </Link>
@@ -192,8 +192,8 @@ export default function PublicLayout({ children }) {
 
       <main className="flex-1 w-full min-w-0">{children}</main>
 
-      <footer className="border-t border-foreground/20 bg-foreground text-background mt-12">
-        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-10 md:py-12">
+      <footer className="border-t-2 border-foreground bg-foreground text-background mt-8">
+        <div className="max-w-[1200px] mx-auto px-5 py-10 md:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
             <div className="lg:col-span-4">
               <Link href="/" className="font-heading font-black text-2xl tracking-tighter inline-block">
@@ -236,8 +236,8 @@ export default function PublicLayout({ children }) {
           </div>
         </div>
 
-        <div className="border-t border-background/15">
-          <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/60">
+        <div className="border-t border-background/20">
+          <div className="max-w-[1200px] mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/70">
             <span>© {new Date().getFullYear()} cybersentry360</span>
             <span>Plagiarism-free · Independent · Human-reviewed</span>
           </div>
