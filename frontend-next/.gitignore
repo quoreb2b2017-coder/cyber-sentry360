@@ -33,5 +33,7 @@ next-env.d.ts
 coverage/
 .vercel
 
-# Never commit a static sitemap — use app/sitemap.ts (dynamic route)
+# Generated during build for route handlers
+lib/seo/generated-sitemap.xml
+lib/seo/generated-sitemap.ts
 public/sitemap.xml

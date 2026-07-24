@@ -10,15 +10,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/sitemap', '/sitemap.xml', '/article/', '/category/', '/tag/', '/search'],
+        allow: ['/', '/sitemap.xml', '/sitemap-index.xml', '/article/', '/category/', '/tag/', '/search'],
         disallow: ['/admin', '/admin/', '/api/'],
       },
       {
         userAgent: 'Googlebot',
-        allow: ['/', '/sitemap', '/sitemap.xml', '/article/', '/category/', '/tag/', '/search'],
+        allow: ['/', '/sitemap.xml', '/sitemap-index.xml', '/article/', '/category/', '/tag/', '/search'],
         disallow: ['/admin/', '/api/'],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/sitemap-index.xml`],
   };
 }
