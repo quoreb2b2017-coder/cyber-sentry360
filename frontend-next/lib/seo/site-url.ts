@@ -1,13 +1,21 @@
 /** Canonical public site URL for sitemap, robots, and metadata. */
+const PRODUCTION_SITE = 'https://www.cybersentry360.com';
+
 export function getSiteUrl(): string {
   const normalize = (raw: string) => raw.trim().replace(/\/+$/, '');
 
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (
-    configured &&
-    !configured.includes('localhost') &&
-    !configured.includes('your-domain')
-  ) {
+  const configuredIsLocal =
+    !configured ||
+    configured.includes('localhost') ||
+    configured.includes('127.0.0.1') ||
+    configured.includes('your-domain');
+
+  if (process.env.VERCEL === '1' && configuredIsLocal) {
+    return PRODUCTION_SITE;
+  }
+
+  if (configured && !configuredIsLocal) {
     return withPreferredWww(normalize(configured.startsWith('http') ? configured : `https://${configured}`));
   }
 
@@ -23,7 +31,7 @@ export function getSiteUrl(): string {
     return withPreferredWww(normalize(`https://${host}`));
   }
 
-  return withPreferredWww(normalize(configured || (process.env.VERCEL === '1' ? 'https://www.cybersentry360.com' : 'http://localhost:3000')));
+  return withPreferredWww(normalize(configured || (process.env.VERCEL === '1' ? PRODUCTION_SITE : 'http://localhost:3000')));
 }
 
 function withPreferredWww(url: string): string {

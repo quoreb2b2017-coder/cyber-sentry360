@@ -10,11 +10,26 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.cybersentry360.com')
-  .trim()
-  .replace(/\/+$/, '');
-
+const PRODUCTION_SITE = 'https://www.cybersentry360.com';
 const DESK_SLUGS = ['ai', 'cybersecurity', 'threats', 'policy', 'cloud', 'data'];
+
+function resolveSiteUrl() {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  // Never ship localhost URLs in production sitemap.
+  if (process.env.VERCEL === '1') {
+    if (!raw || raw.includes('localhost') || raw.includes('127.0.0.1') || raw.includes('your-domain')) {
+      return PRODUCTION_SITE;
+    }
+  }
+
+  if (raw && !raw.includes('localhost') && !raw.includes('127.0.0.1')) {
+    const url = raw.startsWith('http') ? raw : `https://${raw}`;
+    return url.replace(/\/+$/, '');
+  }
+
+  return PRODUCTION_SITE;
+}
 
 function loadEnv() {
   for (const name of ['.env.local', '.env']) {
@@ -61,7 +76,7 @@ function urlEntry(loc, lastmod, changefreq, priority) {
 
 async function main() {
   loadEnv();
-
+  const SITE_URL = resolveSiteUrl();
   const today = new Date().toISOString().slice(0, 10);
   let posts = [];
 
@@ -108,9 +123,14 @@ ${entries.join('\n')}
 </urlset>
 `;
 
+  if (xml.includes('localhost') || xml.includes('127.0.0.1')) {
+    console.error('Refusing to write sitemap with localhost URLs. Set NEXT_PUBLIC_SITE_URL on Vercel.');
+    process.exit(1);
+  }
+
   const out = resolve(root, 'public', 'sitemap.xml');
   writeFileSync(out, xml, 'utf8');
-  console.log(`Wrote ${out} (${entries.length} URLs)`);
+  console.log(`Wrote ${out} (${entries.length} URLs) for ${SITE_URL}`);
 }
 
 main().catch((err) => {
