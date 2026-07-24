@@ -4,7 +4,6 @@ import { buildSitemapXml } from '@/lib/seo/sitemap';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-/** Legacy path — serve XML directly so crawlers never hit a redirect. */
 export async function GET() {
   try {
     const xml = await buildSitemapXml();
@@ -16,7 +15,7 @@ export async function GET() {
       },
     });
   } catch (err) {
-    console.error('api/sitemap.xml error:', err);
+    console.error('sitemap.xml error:', err);
     return new NextResponse('Sitemap unavailable', { status: 500 });
   }
 }
