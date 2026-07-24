@@ -1,37 +1,5 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Next.js
-.next/
-out/
-build/
-dist/
-
-# Env / secrets
-.env
-.env.local
-.env.*.local
-!.env.example
-
-# Debug / OS
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.DS_Store
-*.pem
-Thumbs.db
-
-# TypeScript / IDE
-*.tsbuildinfo
-next-env.d.ts
-.vscode/
-.idea/
-
-# Misc
-coverage/
-.vercel
-
-# Generated at build (sitemap-data module only)
+# Generated at build — do not commit
+lib/seo/sitemap-xml.ts
 lib/seo/sitemap-data.ts
+public/sitemap.xml
+public/google-sitemap.xml
