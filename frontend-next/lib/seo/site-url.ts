@@ -23,7 +23,7 @@ export function getSiteUrl(): string {
     return withPreferredWww(normalize(`https://${host}`));
   }
 
-  return normalize(withPreferredWww(configured || 'http://localhost:3000'));
+  return withPreferredWww(normalize(configured || (process.env.VERCEL === '1' ? 'https://www.cybersentry360.com' : 'http://localhost:3000')));
 }
 
 function withPreferredWww(url: string): string {

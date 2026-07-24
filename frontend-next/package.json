@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/generate-sitemap.mjs",
     "start": "next start",
     "lint": "next lint",
+    "sitemap": "node scripts/generate-sitemap.mjs",
     "refresh-images": "node scripts/refresh-hero-images.mjs"
   },
   "dependencies": {
