@@ -34,4 +34,5 @@ coverage/
 .vercel
 
 # Generated during build — do not commit
+lib/seo/sitemap-data.ts
 public/sitemap.xml
