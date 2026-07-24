@@ -13,6 +13,9 @@ const nextConfig = {
     ],
   },
   poweredByHeader: false,
+  async rewrites() {
+    return [{ source: '/sitemap.xml', destination: '/api/sitemap' }];
+  },
   async redirects() {
     return [
       { source: '/api/robots.txt', destination: '/robots.txt', permanent: true },
