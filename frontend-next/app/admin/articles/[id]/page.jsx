@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Eye, ImageIcon, Loader2 } from 'lucide-react';
 
 const CATEGORIES = ['ai', 'cybersecurity', 'threats', 'policy', 'cloud', 'data'];
 const BLANK = {
@@ -30,6 +30,7 @@ export default function AdminEditorPage() {
   const [form, setForm] = useState(BLANK);
   const [existing, setExisting] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
 
   useEffect(() => {
     if (isNew || !id) return;
@@ -62,6 +63,23 @@ export default function AdminEditorPage() {
   }, [id, isNew]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const fetchUnsplashImage = async () => {
+    if (!existing?.id) return toast.error('Save draft first, then fetch image');
+    setImageBusy(true);
+    try {
+      const { data } = await api.post('/admin/images/refresh', { postId: existing.id });
+      const item = data.items?.[0];
+      if (item?.url) {
+        set('hero_image', item.url);
+        toast.success(`Unsplash image applied (${item.query})`);
+      }
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Unsplash fetch failed');
+    } finally {
+      setImageBusy(false);
+    }
+  };
 
   const save = async (publish = false) => {
     setBusy(true);
@@ -128,7 +146,22 @@ export default function AdminEditorPage() {
             <input value={form.author} onChange={(e) => set('author', e.target.value)} className="w-full border-2 border-foreground px-4 py-3 font-mono text-sm bg-background focus:outline-none" data-testid="ed-author-input" />
           </Field>
           <Field label="Hero image URL" testid="ed-hero">
-            <input value={form.hero_image} onChange={(e) => set('hero_image', e.target.value)} placeholder="https://…" className="w-full border-2 border-foreground px-4 py-3 font-mono text-xs bg-background focus:outline-none" data-testid="ed-hero-input" />
+            {form.hero_image && (
+              <img src={form.hero_image} alt="" className="w-full aspect-[16/9] object-cover border-2 border-foreground mb-2" />
+            )}
+            <input value={form.hero_image} onChange={(e) => set('hero_image', e.target.value)} placeholder="Auto from Unsplash on generate…" className="w-full border-2 border-foreground px-4 py-3 font-mono text-xs bg-background focus:outline-none mb-2" data-testid="ed-hero-input" />
+            {existing && (
+              <button
+                type="button"
+                disabled={imageBusy}
+                onClick={fetchUnsplashImage}
+                className="brutal-btn w-full text-[10px] gap-2"
+                data-testid="ed-hero-unsplash"
+              >
+                {imageBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                Fetch from Unsplash
+              </button>
+            )}
           </Field>
           <Field label="Tags (comma separated)" testid="ed-tags">
             <input value={form.tags.join(', ')} onChange={(e) => set('tags', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} className="w-full border-2 border-foreground px-4 py-3 font-mono text-xs bg-background focus:outline-none" data-testid="ed-tags-input" />

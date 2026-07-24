@@ -9,7 +9,8 @@ import {
 import { buildCombinedSchema, imageFilename, webpFilename } from './seo';
 import { sanitizeSeoFields } from './meta';
 import { sanitizeArticleMarkdown } from './markdown-inline';
-import { slugify, calcReadingTime, deskHeroImage } from '../posts';
+import { slugify, calcReadingTime } from '../posts';
+import { fetchUnsplashHeroImage, photoIdFromUrl } from '../unsplash';
 import type { AutomationSettings, GeneratedArticle, Post, Service } from '../types';
 
 const DEFAULT_SETTINGS: AutomationSettings = {
@@ -140,6 +141,18 @@ async function getInternalLinkTargets(excludeServiceSlug: string) {
   return targets.slice(0, 10);
 }
 
+async function getUsedHeroPhotoIds(excludePostId?: string) {
+  const db = getAdminClient();
+  const { data } = await db.from('posts').select('id, featured_image');
+  const used = new Set<string>();
+  for (const row of data || []) {
+    if (excludePostId && row.id === excludePostId) continue;
+    const id = photoIdFromUrl(row.featured_image);
+    if (id) used.add(id);
+  }
+  return used;
+}
+
 export async function generateArticleForService(
   service: Service,
   settings: AutomationSettings,
@@ -203,6 +216,16 @@ export async function generateArticleForService(
     near_me_keywords: generated.near_me_keywords || [],
   };
 
+  const hero = await fetchUnsplashHeroImage({
+    topic: generated.topic || topic,
+    title: seo.title,
+    category: service.slug,
+    focusKeyword: seo.focus_keyword,
+    featuredImagePrompt: generated.featured_image_prompt,
+    keywords: seo.keywords,
+    excludePhotoIds: await getUsedHeroPhotoIds(),
+  });
+
   const postRow = {
     title: seo.title,
     subtitle: seo.subtitle,
@@ -212,7 +235,7 @@ export async function generateArticleForService(
     status: shouldPublish ? 'published' : 'draft',
     category: service.slug,
     service_id: service.id,
-    featured_image: deskHeroImage(service.slug),
+    featured_image: hero.url,
     featured_prompt: generated.featured_image_prompt,
     seo_title: seo.seo_title,
     meta_title: seo.meta_title,
@@ -321,6 +344,16 @@ export async function generateManualArticle(params: {
   const now = new Date().toISOString();
   const shouldPublish = params.autoPublish === true;
 
+  const hero = await fetchUnsplashHeroImage({
+    topic: generated.topic || params.topic,
+    title: seo.title,
+    category: params.category,
+    focusKeyword: seo.focus_keyword,
+    featuredImagePrompt: generated.featured_image_prompt,
+    keywords: seo.keywords,
+    excludePhotoIds: await getUsedHeroPhotoIds(),
+  });
+
   const postRow = {
     title: seo.title,
     subtitle: seo.subtitle,
@@ -330,7 +363,7 @@ export async function generateManualArticle(params: {
     status: shouldPublish ? 'published' : 'draft',
     category: params.category,
     service_id: service?.id || null,
-    featured_image: deskHeroImage(params.category),
+    featured_image: hero.url,
     featured_prompt: generated.featured_image_prompt,
     seo_title: seo.seo_title,
     meta_title: seo.meta_title,

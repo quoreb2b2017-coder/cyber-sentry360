@@ -69,6 +69,56 @@ const DESK_IMAGES = {
   data: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=85',
 };
 
+const DESK_QUERIES = {
+  ai: 'artificial intelligence cybersecurity technology',
+  cybersecurity: 'cybersecurity network security data center',
+  threats: 'cyber threat hacking security operations',
+  policy: 'compliance governance regulation technology',
+  cloud: 'cloud computing security infrastructure',
+  data: 'data privacy encryption analytics security',
+};
+
+function buildUnsplashQuery(post, generated) {
+  const category = post?.category || generated?.category || 'cybersecurity';
+  const desk = DESK_QUERIES[category] || DESK_QUERIES.cybersecurity;
+  const raw = [
+    generated?.focus_keyword,
+    ...(generated?.keywords || []).slice(0, 2),
+    generated?.topic,
+    generated?.title,
+    generated?.featured_image_prompt,
+    desk,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/[^\w\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = [...new Set(raw.toLowerCase().split(' '))].filter((w) => w.length > 2);
+  return words.slice(0, 10).join(' ') || desk;
+}
+
+async function fetchUnsplashHero(category, generated) {
+  const key = process.env.UNSPLASH_ACCESS_KEY?.trim();
+  const fallback = DESK_IMAGES[category] || DESK_IMAGES.cybersecurity;
+  if (!key) return fallback;
+
+  const query = buildUnsplashQuery({ category }, generated);
+  const params = new URLSearchParams({ query, per_page: '1', orientation: 'landscape', content_filter: 'high' });
+  const res = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
+    headers: { Authorization: `Client-ID ${key}`, 'Accept-Version': 'v1' },
+  });
+  if (!res.ok) {
+    console.warn(`Unsplash ${res.status}, using desk fallback`);
+    return fallback;
+  }
+  const data = await res.json();
+  const regular = data.results?.[0]?.urls?.regular;
+  if (!regular) return fallback;
+  console.log(`   Image query: ${query}`);
+  return `${regular.split('?')[0]}?auto=format&fit=crop&w=1600&q=85`;
+}
+
 function parseJSON(raw) {
   let cleaned = raw.trim();
   const fence = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -282,6 +332,8 @@ Return this exact JSON:
 
   const schema = [articleSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])];
 
+  const heroImage = await fetchUnsplashHero(service.slug, generated);
+
   const postRow = {
     title: generated.title,
     subtitle: generated.subtitle,
@@ -291,7 +343,7 @@ Return this exact JSON:
     status: 'published',
     category: service.slug,
     service_id: service.id,
-    featured_image: DESK_IMAGES[service.slug] || DESK_IMAGES.cybersecurity,
+    featured_image: heroImage,
     featured_prompt: generated.featured_image_prompt,
     seo_title: generated.seo_title,
     meta_title: generated.meta_title,

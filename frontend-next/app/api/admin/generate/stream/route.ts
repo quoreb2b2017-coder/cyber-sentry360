@@ -3,8 +3,10 @@ import { getAutomationSettings } from '@/lib/content/generator';
 import { buildSystemPrompt, buildManualGeneratePrompt, buildManualMetadataGeneratePrompt } from '@/lib/content/prompts';
 import { buildCombinedSchema, imageFilename, webpFilename } from '@/lib/content/seo';
 import { sanitizeSeoFields, validateSeoInput, clampText } from '@/lib/content/meta';
+import { sanitizeArticleMarkdown } from '@/lib/content/markdown-inline';
 import { streamWithClaude, parseGeneratedJSON } from '@/lib/anthropic';
-import { toArticleDTO, slugify, calcReadingTime, deskHeroImage } from '@/lib/posts';
+import { toArticleDTO, slugify, calcReadingTime } from '@/lib/posts';
+import { fetchUnsplashHeroImage, photoIdFromUrl } from '@/lib/unsplash';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { requireApiAuth } from '@/lib/api-auth';
 
@@ -181,16 +183,33 @@ export async function POST(request: Request) {
         const slug = await ensureUniqueSlug(slugify(seo.title));
         const { data: service } = await db.from('services').select('id').eq('slug', category).maybeSingle();
 
+        const { data: existingImages } = await db.from('posts').select('featured_image');
+        const excludePhotoIds = new Set<string>();
+        for (const row of existingImages || []) {
+          const id = photoIdFromUrl(row.featured_image);
+          if (id) excludePhotoIds.add(id);
+        }
+
+        const hero = await fetchUnsplashHeroImage({
+          topic: topic.trim(),
+          title: seo.title,
+          category,
+          focusKeyword: seo.focus_keyword,
+          featuredImagePrompt: generated.featured_image_prompt,
+          keywords: seo.keywords,
+          excludePhotoIds,
+        });
+
         const row = {
           title: seo.title,
           subtitle: seo.subtitle,
           slug,
-          content: generated.content,
+          content: sanitizeArticleMarkdown(generated.content),
           excerpt: seo.excerpt,
           status: auto_publish ? 'published' : 'draft',
           category,
           service_id: service?.id || null,
-          featured_image: deskHeroImage(category),
+          featured_image: hero.url,
           featured_prompt: generated.featured_image_prompt,
           seo_title: seo.seo_title,
           meta_title: seo.meta_title,
