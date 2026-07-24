@@ -33,7 +33,5 @@ next-env.d.ts
 coverage/
 .vercel
 
-# Generated during build for route handlers
-lib/seo/generated-sitemap.xml
-lib/seo/generated-sitemap.ts
+# Generated during build — do not commit
 public/sitemap.xml

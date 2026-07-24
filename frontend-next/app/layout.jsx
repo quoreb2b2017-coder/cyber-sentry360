@@ -48,6 +48,9 @@ export const metadata = {
     shortcut: ['/favicon.ico'],
   },
   manifest: '/manifest.webmanifest',
+  verification: {
+    google: 'googlee92e0cf8261b500f',
+  },
 };
 
 export default function RootLayout({ children }) {
