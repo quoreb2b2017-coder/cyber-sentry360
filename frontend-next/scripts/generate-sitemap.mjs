@@ -1,8 +1,9 @@
 /**
- * Writes public/sitemap.xml at build time (served as static CDN asset).
+ * Writes lib/seo/sitemap.generated.xml at build time.
+ * Served via app/sitemap.xml/route.ts (no Content-Disposition: inline).
  */
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -122,7 +123,8 @@ ${entries.join('\n')}
     process.exit(1);
   }
 
-  const out = resolve(root, 'public', 'sitemap.xml');
+  const out = resolve(root, 'lib/seo/sitemap.generated.xml');
+  mkdirSync(resolve(root, 'lib/seo'), { recursive: true });
   writeFileSync(out, xml, 'utf8');
   console.log(`Wrote ${out} (${entries.length} URLs) for ${SITE_URL}`);
 }
