@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/generate-sitemap.mjs && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sitemap": "node scripts/generate-sitemap.mjs",
     "refresh-images": "node scripts/refresh-hero-images.mjs"
   },
   "dependencies": {
