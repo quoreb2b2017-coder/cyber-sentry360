@@ -123,10 +123,12 @@ ${entries.join('\n')}
     process.exit(1);
   }
 
-  const out = resolve(root, 'lib/seo/sitemap.generated.xml');
-  mkdirSync(resolve(root, 'lib/seo'), { recursive: true });
-  writeFileSync(out, xml, 'utf8');
-  console.log(`Wrote ${out} (${entries.length} URLs) for ${SITE_URL}`);
+  const outDir = resolve(root, 'lib/seo');
+  const publicOut = resolve(root, 'public', 'sitemap.xml');
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(resolve(outDir, 'sitemap.generated.xml'), xml, 'utf8');
+  writeFileSync(publicOut, xml, 'utf8');
+  console.log(`Wrote ${publicOut} (${entries.length} URLs) for ${SITE_URL}`);
 }
 
 main().catch((err) => {
