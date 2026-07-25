@@ -1,6 +1,6 @@
 /**
- * Generates public/sitemap.xml before build for Google Search Console.
- * Run via: npm run build (prebuild) or npm run sitemap
+ * Regenerates static public/sitemap.xml (plain file, not a Next.js route).
+ * Runs before and after build so the committed static file stays current.
  */
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, writeFileSync } from 'fs';
