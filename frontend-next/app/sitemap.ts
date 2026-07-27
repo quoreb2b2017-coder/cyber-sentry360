@@ -29,11 +29,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     posts = [];
   }
 
-  const tagSet = new Set<string>();
+  const tagMap = new Map<string, string>();
   for (const post of posts) {
     for (const tag of post.tags ?? []) {
       const value = String(tag).trim();
-      if (value) tagSet.add(value);
+      if (!value) continue;
+      const key = value.toLowerCase();
+      const existing = tagMap.get(key);
+      const isLower = value === key;
+      if (!existing || (isLower && existing !== key)) {
+        tagMap.set(key, value);
+      }
     }
   }
 
@@ -56,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     })),
-    ...[...tagSet].slice(0, 120).map((tag) => ({
+    ...[...tagMap.values()].slice(0, 120).map((tag) => ({
       url: `${baseUrl}/tag/${encodeURIComponent(tag)}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
