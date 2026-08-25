@@ -7,7 +7,3 @@ export function tagToSlug(tag: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
-
-export function tagHref(tag: string): string {
-  return `/tag/${tagToSlug(tag)}`;
-}

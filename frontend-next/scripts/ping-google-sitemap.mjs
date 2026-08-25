@@ -8,5 +8,5 @@ const SITE = 'https://www.cybersentry360.com';
 console.log('Google sitemap ping is deprecated (removed June 2023).');
 console.log('Submit your sitemap in Search Console instead:');
 console.log(`  Property: ${SITE}/`);
-console.log('  Sitemaps → enter: sitemap.xml → Submit');
+console.log('  Sitemaps → enter: https://www.cybersentry360.com/sitemap/sitemap.xml');
 console.log('After submit, wait 24–48h for "Last read" and discovered pages.');

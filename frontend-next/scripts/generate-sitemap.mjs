@@ -1,5 +1,6 @@
 /**
  * Build-time sitemap → public/sitemap/sitemap.xml (CDN static, GSC-friendly path).
+ * Indexable URLs only: home, desks, published articles. No /tag/ archives.
  * Requires NEXT_PUBLIC_SUPABASE_* on Vercel; keeps existing file if env/DB unavailable.
  */
 import { createClient } from '@supabase/supabase-js';
@@ -70,39 +71,41 @@ function urlEntry(loc, lastmod, changefreq, priority) {
   </url>`;
 }
 
-function tagToSlug(tag) {
-  return String(tag)
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+function uniquePosts(posts) {
+  const seen = new Set();
+  const out = [];
+  for (const post of posts || []) {
+    const slug = String(post?.slug || '')
+      .trim()
+      .replace(/^\/+|\/+$/g, '');
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+    out.push({ ...post, slug });
+  }
+  return out;
 }
 
 function buildXml(SITE_URL, posts) {
   const today = new Date().toISOString().slice(0, 10);
-  const tagSlugs = new Set();
-  for (const post of posts) {
-    for (const tag of post.tags || []) {
-      const t = String(tag).trim();
-      if (t) tagSlugs.add(tagToSlug(t));
-    }
-  }
+  const list = uniquePosts(posts);
+  const homeLastmod = list[0] ? toLastMod(list[0].updated_at || list[0].published_at) : today;
 
   const entries = [
-    urlEntry(SITE_URL, posts[0] ? toLastMod(posts[0].updated_at || posts[0].published_at) : today, 'daily', '1.0'),
-    urlEntry(`${SITE_URL}/search`, today, 'weekly', '0.5'),
-    ...DESK_SLUGS.map((slug) => urlEntry(`${SITE_URL}/category/${slug}`, today, 'daily', '0.85')),
-    ...posts.map((post) =>
+    urlEntry(SITE_URL, homeLastmod, 'daily', '1.0'),
+    ...DESK_SLUGS.map((slug) => {
+      const deskPosts = list.filter((p) => p.category === slug);
+      const lastmod = deskPosts[0]
+        ? toLastMod(deskPosts[0].updated_at || deskPosts[0].published_at)
+        : today;
+      return urlEntry(`${SITE_URL}/category/${slug}`, lastmod, 'daily', '0.85');
+    }),
+    ...list.map((post) =>
       urlEntry(
         `${SITE_URL}/article/${post.slug}`,
         toLastMod(post.updated_at || post.published_at),
         'weekly',
         '0.9'
       )
-    ),
-    ...[...tagSlugs].slice(0, 120).map((slug) =>
-      urlEntry(`${SITE_URL}/tag/${slug}`, today, 'weekly', '0.4')
     ),
   ];
 
@@ -113,6 +116,27 @@ ${entries.join('\n')}
 `;
 }
 
+function assertValidSitemap(xml, siteUrl, postCount) {
+  if (xml.includes('localhost') || xml.includes('127.0.0.1')) {
+    throw new Error('Refusing to write sitemap with localhost URLs.');
+  }
+  if (xml.includes('/tag/')) {
+    throw new Error('Refusing to write sitemap with /tag/ URLs.');
+  }
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  if (new Set(locs).size !== locs.length) {
+    throw new Error('Sitemap contains duplicate <loc> URLs.');
+  }
+  const expected = 1 + DESK_SLUGS.length + postCount;
+  if (locs.length !== expected) {
+    throw new Error(`Sitemap URL count ${locs.length} != expected ${expected}.`);
+  }
+  const bad = locs.find((loc) => !loc.startsWith(`${siteUrl}/`) && loc !== siteUrl);
+  if (bad) {
+    throw new Error(`Sitemap loc is not on ${siteUrl}: ${bad}`);
+  }
+}
+
 async function main() {
   loadEnv();
   const SITE_URL = resolveSiteUrl();
@@ -121,7 +145,7 @@ async function main() {
 
   if (!url || !key) {
     if (existsSync(publicOut)) {
-      console.warn('Supabase env missing — keeping existing public/sitemap.xml');
+      console.warn('Supabase env missing — keeping existing public/sitemap/sitemap.xml');
       return;
     }
     const fallback = buildXml(SITE_URL, []);
@@ -135,14 +159,14 @@ async function main() {
     const db = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
     const { data, error } = await db
       .from('posts')
-      .select('slug, updated_at, published_at, tags')
+      .select('slug, category, updated_at, published_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false });
     if (error) throw error;
-    posts = data || [];
+    posts = uniquePosts(data || []);
   } catch (err) {
     if (existsSync(publicOut)) {
-      console.warn('Supabase fetch failed — keeping existing public/sitemap.xml:', err.message || err);
+      console.warn('Supabase fetch failed — keeping existing public/sitemap/sitemap.xml:', err.message || err);
       return;
     }
     console.warn('Supabase fetch failed — writing minimal sitemap:', err.message || err);
@@ -150,15 +174,13 @@ async function main() {
   }
 
   const xml = buildXml(SITE_URL, posts);
-  if (xml.includes('localhost') || xml.includes('127.0.0.1')) {
-    console.error('Refusing to write sitemap with localhost URLs.');
-    process.exit(1);
-  }
+  assertValidSitemap(xml, SITE_URL, posts.length);
 
   mkdirSync(dirname(publicOut), { recursive: true });
   writeFileSync(publicOut, xml, 'utf8');
   const count = (xml.match(/<url>/g) || []).length;
   console.log(`Wrote ${publicOut} (${count} URLs) for ${SITE_URL}`);
+  console.log(`  home: 1 · desks: ${DESK_SLUGS.length} · articles: ${posts.length}`);
 }
 
 main().catch((err) => {

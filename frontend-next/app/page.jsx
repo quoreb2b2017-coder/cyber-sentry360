@@ -6,7 +6,6 @@ import { Zap, Newspaper, Search } from 'lucide-react';
 import PublicLayout from '@/components/PublicLayout';
 import { ArticleCard, ArticleGridSkeleton, DeskTabs, DESKS } from '@/components/ArticleCard';
 import { NewsletterSubscribe } from '@/components/NewsletterSubscribe';
-import { tagHref } from '@/lib/seo/tag-slug';
 
 export default function HomePage() {
   const { data, isLoading } = useQuery({
@@ -96,14 +95,9 @@ export default function HomePage() {
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {topics.map((t) => (
-                    <Link
-                      key={t.tag}
-                      href={tagHref(t.tag)}
-                      className="tag-chip"
-                      data-testid={`topic-${t.tag}`}
-                    >
+                    <span key={t.tag} className="tag-chip" data-testid={`topic-${t.tag}`}>
                       {t.tag}
-                    </Link>
+                    </span>
                   ))}
                 </div>
               </section>
