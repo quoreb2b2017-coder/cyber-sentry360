@@ -222,6 +222,7 @@ export default function PublicLayout({ children }) {
               <div className="overline text-primary mb-3">Explore</div>
               <ul className="space-y-2 font-mono text-[11px] uppercase tracking-wider">
                 <li><Link href="/search" className="hover:text-primary">Archive</Link></li>
+                <li><Link href="/unsubscribe" className="hover:text-primary">Unsubscribe</Link></li>
                 <li><Link href="/admin/login" className="hover:text-primary">Newsroom</Link></li>
                 <li><Link href="/category/ai" className="hover:text-primary">Latest AI</Link></li>
                 <li><Link href="/category/threats" className="hover:text-primary">Threats</Link></li>
@@ -239,7 +240,13 @@ export default function PublicLayout({ children }) {
         <div className="border-t border-background/20">
           <div className="max-w-[1200px] mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/70">
             <span>© {new Date().getFullYear()} cybersentry360</span>
-            <span>Plagiarism-free · Independent · Human-reviewed</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/unsubscribe" className="hover:text-primary transition-colors" data-testid="footer-unsubscribe">
+                Unsubscribe
+              </Link>
+              <span className="hidden sm:inline text-background/40">·</span>
+              <span>Plagiarism-free · Independent · Human-reviewed</span>
+            </div>
           </div>
         </div>
       </footer>

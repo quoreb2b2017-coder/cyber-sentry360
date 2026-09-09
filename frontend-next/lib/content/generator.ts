@@ -15,7 +15,7 @@ import type { AutomationSettings, GeneratedArticle, Post, Service } from '../typ
 
 const DEFAULT_SETTINGS: AutomationSettings = {
   enabled: true,
-  daily_time: '06:00',
+  daily_time: '12:30',
   articles_per_day: 1,
   ai_model: DEFAULT_ANTHROPIC_MODEL,
   temperature: 0.85,
@@ -433,7 +433,7 @@ export async function runDailyAutomation(): Promise<{
   await db.from('cron_logs').insert({
     job_type: 'daily_generate',
     status: 'started',
-    message: 'Tue/Fri article generation started',
+    message: 'Mon/Fri article generation started',
   });
 
   const service = await getNextService();

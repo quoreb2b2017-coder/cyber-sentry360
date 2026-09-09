@@ -16,6 +16,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ detail: 'Valid email required' }, { status: 400 });
     }
 
+    const reason = typeof body.reason === 'string' ? body.reason.slice(0, 80) : null;
+
     const db = getAdminClient();
     const now = new Date().toISOString();
 
@@ -33,10 +35,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, subscribed: false, message: 'Already unsubscribed' });
     }
 
-    const { error } = await db
-      .from('newsletter_subscribers')
-      .update({ status: 'unsubscribed', unsubscribed_at: now })
-      .eq('email', email);
+    const updates: Record<string, unknown> = {
+      status: 'unsubscribed',
+      unsubscribed_at: now,
+    };
+    // Optional insight — ignored if column does not exist yet
+    if (reason) updates.unsubscribe_reason = reason;
+
+    let { error } = await db.from('newsletter_subscribers').update(updates).eq('email', email);
+
+    if (error && reason && /unsubscribe_reason|column/i.test(error.message)) {
+      ({ error } = await db
+        .from('newsletter_subscribers')
+        .update({ status: 'unsubscribed', unsubscribed_at: now })
+        .eq('email', email));
+    }
 
     if (error) {
       return NextResponse.json({ detail: error.message }, { status: 500 });

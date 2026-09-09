@@ -80,7 +80,7 @@ export default function CategoryPage() {
                 No stories on this desk yet
               </h2>
               <p className="text-caption mb-5 max-w-md mx-auto">
-                Tue &amp; Fri automation will publish here when this desk is next in rotation - or draft one now.
+                Mon &amp; Fri automation will publish here when this desk is next in rotation - or draft one now.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 <Link href="/" className="brutal-btn text-[10px]">

@@ -2,13 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.cybersentry360.com</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.cybersentry360.com/category/ai</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://www.cybersentry360.com/category/policy</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-09-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
@@ -38,9 +38,27 @@
   </url>
   <url>
     <loc>https://www.cybersentry360.com/category/data</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.cybersentry360.com/article/backdoor-attacks-in-fine-tuned-security-models-the-hidden-threat</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.cybersentry360.com/article/hipaas-2025-cybersecurity-overhaul-healthcare-breach-rules</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.cybersentry360.com/article/time-boxed-encryption-keys-the-real-time-analytics-trap</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.cybersentry360.com/article/terraform-state-file-exfiltration-credentials-in-cicd</loc>
