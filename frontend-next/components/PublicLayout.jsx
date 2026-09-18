@@ -239,7 +239,11 @@ export default function PublicLayout({ children }) {
 
         <div className="border-t border-background/20">
           <div className="max-w-[1200px] mx-auto px-5 py-4 flex flex-wrap justify-between items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-background/70">
-            <span>© {new Date().getFullYear()} cybersentry360</span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span>© {new Date().getFullYear()} cybersentry360</span>
+              <span className="hidden sm:inline text-background/40">·</span>
+              <span className="normal-case tracking-wide">Published by Quore B2B Marketing.</span>
+            </div>
             <div className="flex flex-wrap items-center gap-4">
               <Link href="/unsubscribe" className="hover:text-primary transition-colors" data-testid="footer-unsubscribe">
                 Unsubscribe
