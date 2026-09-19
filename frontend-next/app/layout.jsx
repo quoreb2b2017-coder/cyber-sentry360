@@ -56,6 +56,11 @@ export const metadata = {
   verification: {
     google: 'googlee92e0cf8261b500f',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': 'https://www.cybersentry360.com/feed.xml',
+    },
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -66,6 +71,12 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
         <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="cybersentry360 RSS"
+          href="https://www.cybersentry360.com/feed.xml"
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
           rel="stylesheet"

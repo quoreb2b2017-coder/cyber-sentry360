@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Allow: /sitemap.xml
+Allow: /feed.xml
+Allow: /rss.xml
 Allow: /article/
 Allow: /category/
 Allow: /tag/
@@ -12,6 +14,8 @@ Disallow: /api/
 User-agent: Googlebot
 Allow: /
 Allow: /sitemap.xml
+Allow: /feed.xml
+Allow: /rss.xml
 Allow: /article/
 Allow: /category/
 Allow: /tag/
