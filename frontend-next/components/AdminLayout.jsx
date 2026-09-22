@@ -15,7 +15,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, testid: 'sidebar-dashboard' },
       { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, testid: 'sidebar-analytics' },
-      { to: '/admin/consent', label: 'Cookie Consent', icon: ShieldCheck, testid: 'sidebar-consent' },
+      { to: '/admin/cookies-report', label: 'Cookies & visitors', icon: ShieldCheck, testid: 'sidebar-cookies-report' },
     ],
   },
   {
@@ -61,7 +61,8 @@ const PAGE_TITLES = {
   '/admin/feeds': 'News Feeds',
   '/admin/newsletter': 'Newsletter',
   '/admin/analytics': 'Analytics',
-  '/admin/consent': 'Cookie Consent',
+  '/admin/cookies-report': 'Cookies & visitors',
+  '/admin/consent': 'Cookies & visitors',
   '/admin/settings': 'Settings',
   '/admin/profile': 'Profile',
 };

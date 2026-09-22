@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Settings2, X } from 'lucide-react';
 import {
   OPEN_PREFS_EVENT,
+  OPEN_PREFS_EVENT_ALT,
   getConsent,
   hasConsentDecision,
   saveConsent,
@@ -69,7 +70,11 @@ export default function CookieConsentBanner() {
     };
 
     window.addEventListener(OPEN_PREFS_EVENT, openPrefs);
-    return () => window.removeEventListener(OPEN_PREFS_EVENT, openPrefs);
+    window.addEventListener(OPEN_PREFS_EVENT_ALT, openPrefs);
+    return () => {
+      window.removeEventListener(OPEN_PREFS_EVENT, openPrefs);
+      window.removeEventListener(OPEN_PREFS_EVENT_ALT, openPrefs);
+    };
   }, []);
 
   const persist = useCallback((nextAnalytics, nextMarketing, choice) => {

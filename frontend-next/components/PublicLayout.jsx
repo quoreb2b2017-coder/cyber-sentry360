@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import { Search as SearchIcon, Menu, X, ArrowRight } from 'lucide-react';
 import { NewsletterSubscribe } from '@/components/NewsletterSubscribe';
 import RouteChangeSpinner, { signalNavStart } from '@/components/RouteChangeSpinner';
-import { openCookiePreferences } from '@/lib/consent';
+import CookiePreferencesTrigger from '@/components/CookiePreferencesTrigger';
 
 const NAV = [
   { slug: 'ai', name: 'AI' },
@@ -251,14 +251,10 @@ export default function PublicLayout({ children }) {
                 Privacy
               </Link>
               <span className="hidden sm:inline text-background/40">·</span>
-              <button
-                type="button"
-                onClick={() => openCookiePreferences()}
+              <CookiePreferencesTrigger
                 className="hover:text-primary transition-colors uppercase tracking-widest"
                 data-testid="footer-cookie-preferences"
-              >
-                Cookie preferences
-              </button>
+              />
               <span className="hidden sm:inline text-background/40">·</span>
               <Link href="/unsubscribe" className="hover:text-primary transition-colors" data-testid="footer-unsubscribe">
                 Unsubscribe
