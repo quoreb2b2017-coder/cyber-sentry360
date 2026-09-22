@@ -145,11 +145,14 @@ export default function AdminCookiesReportPage() {
           <Cookie className="w-3 h-3" /> GDPR / visitors
         </div>
         <h1 className="font-heading font-black uppercase text-4xl md:text-5xl tracking-tighter">
-          GDPR / Cookies
+          Cookies
         </h1>
         <p className="mt-2 font-serif italic text-lg text-muted-foreground max-w-2xl">
-          First-party page views, consent decisions, campaigns, and approximate geo — admin only. IPs shown are
-          pseudonymized. No full emails stored.
+          First-party page views, sessions, campaigns, and approximate geo. For consent lawfulness see{' '}
+          <Link href="/admin/gdpr" className="text-primary underline underline-offset-2">
+            GDPR
+          </Link>
+          . IPs shown are pseudonymized. No full emails stored.
         </p>
       </div>
 

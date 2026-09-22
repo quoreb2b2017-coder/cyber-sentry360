@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { Sparkles, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Sparkles, Zap, AlertTriangle, ShieldCheck, Cookie } from 'lucide-react';
 
 function Stat({ label, value, testid, accent }) {
   return (
@@ -95,8 +95,8 @@ export default function AdminDashboardPage() {
           <div className="overline flex items-center gap-2">
             <ShieldCheck className="w-3 h-3 text-primary" /> Cookie Consent · GDPR / CCPA
           </div>
-          <Link href="/admin/cookies-report" className="overline hover:text-primary" data-testid="see-consent">
-            View details →
+          <Link href="/admin/gdpr" className="overline hover:text-primary" data-testid="see-consent">
+            Open GDPR →
           </Link>
         </div>
         {consent.available ? (
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <Link href="/admin/automation" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all group" data-testid="quick-automation">
           <Zap className="w-6 h-6 text-primary mb-3" />
           <div className="font-heading font-bold uppercase text-lg">Automation</div>
@@ -132,10 +132,15 @@ export default function AdminDashboardPage() {
           <div className="font-heading font-bold uppercase text-lg">AI Generate</div>
           <p className="text-sm text-muted-foreground mt-1">Draft an article from a keyword or topic.</p>
         </Link>
-        <Link href="/admin/cookies-report" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-consent">
+        <Link href="/admin/cookies-report" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-cookies">
+          <Cookie className="w-6 h-6 text-primary mb-3" />
+          <div className="font-heading font-bold uppercase text-lg">Cookies</div>
+          <p className="text-sm text-muted-foreground mt-1">Visitors, page views, UTMs, and sessions.</p>
+        </Link>
+        <Link href="/admin/gdpr" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-consent">
           <ShieldCheck className="w-6 h-6 text-primary mb-3" />
-          <div className="font-heading font-bold uppercase text-lg">GDPR / Cookies</div>
-          <p className="text-sm text-muted-foreground mt-1">Consent, visitors, campaigns, and analytics events.</p>
+          <div className="font-heading font-bold uppercase text-lg">GDPR</div>
+          <p className="text-sm text-muted-foreground mt-1">Consent decisions, opt-in rates, compliance checklist.</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

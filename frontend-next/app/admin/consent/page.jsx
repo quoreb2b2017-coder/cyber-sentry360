@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Legacy path — use Cookies & visitors report. */
+/** Legacy path — GDPR consent lives at /admin/gdpr */
 export default function AdminConsentRedirect() {
-  redirect('/admin/cookies-report');
+  redirect('/admin/gdpr');
 }

@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import {
   LogOut, LayoutDashboard, Sparkles, FileText, Rss, Mail,
   Layers, Search, Zap, BarChart3, Settings, User, ScrollText,
-  Menu, X, ExternalLink, ChevronRight, ShieldCheck,
+  Menu, X, ExternalLink, ChevronRight, Cookie, Scale,
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -15,7 +15,8 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, testid: 'sidebar-dashboard' },
       { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, testid: 'sidebar-analytics' },
-      { to: '/admin/cookies-report', label: 'GDPR / Cookies', badge: 'Live', icon: ShieldCheck, testid: 'sidebar-cookies-report' },
+      { to: '/admin/cookies-report', label: 'Cookies', icon: Cookie, testid: 'sidebar-cookies-report' },
+      { to: '/admin/gdpr', label: 'GDPR', icon: Scale, testid: 'sidebar-gdpr' },
     ],
   },
   {
@@ -61,8 +62,9 @@ const PAGE_TITLES = {
   '/admin/feeds': 'News Feeds',
   '/admin/newsletter': 'Newsletter',
   '/admin/analytics': 'Analytics',
-  '/admin/cookies-report': 'GDPR / Cookies',
-  '/admin/consent': 'GDPR / Cookies',
+  '/admin/cookies-report': 'Cookies',
+  '/admin/gdpr': 'GDPR',
+  '/admin/consent': 'GDPR',
   '/admin/settings': 'Settings',
   '/admin/profile': 'Profile',
 };
@@ -97,11 +99,6 @@ function SidebarNav({ pathname, onNavigate }) {
                   >
                     <l.icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-primary' : 'text-background/50'}`} />
                     <span className="truncate">{l.label}</span>
-                    {l.badge ? (
-                      <span className="ml-auto shrink-0 font-mono text-[8px] uppercase tracking-widest text-primary border border-primary/40 px-1 py-0.5">
-                        {l.badge}
-                      </span>
-                    ) : null}
                   </Link>
                 </li>
               );
