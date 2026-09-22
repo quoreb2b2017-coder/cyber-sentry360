@@ -8,11 +8,14 @@ export async function GET() {
   const { data: posts } = await db
     .from('posts')
     .select('tags')
-    .eq('status', 'published');
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(80);
 
   const counts: Record<string, number> = {};
   for (const p of posts || []) {
     for (const tag of p.tags || []) {
+      if (!tag) continue;
       counts[tag] = (counts[tag] || 0) + 1;
     }
   }

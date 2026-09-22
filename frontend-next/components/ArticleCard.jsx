@@ -2,24 +2,18 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { formatDate } from '@/lib/api';
+import { DESKS } from '@/lib/desks';
+
+export { DESKS };
 
 const HERO_FALLBACK = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=srgb&fm=jpg&q=85&w=1600';
 
-export const DESKS = [
-  { slug: 'ai', name: 'AI', blurb: 'Models, agents, and enterprise AI risk' },
-  { slug: 'cybersecurity', name: 'Cyber', blurb: 'Defense, resilience, and security ops' },
-  { slug: 'threats', name: 'Threats', blurb: 'Actor tactics and emerging attacks' },
-  { slug: 'policy', name: 'Policy', blurb: 'Regulation, compliance, and governance' },
-  { slug: 'cloud', name: 'Cloud', blurb: 'Architecture, CSPM, and multi-cloud risk' },
-  { slug: 'data', name: 'Data', blurb: 'Privacy, encryption, and DLP' },
-];
-
-export function ArticleCard({ a, showCategory = true }) {
+export function ArticleCard({ a, showCategory = true, priority = false }) {
   return (
     <article className="brutal-border bg-card group h-full flex flex-col overflow-hidden hover:shadow-brutal-sm transition-shadow duration-100">
       <Link
         href={`/article/${a.slug}`}
-        prefetch
+        prefetch={false}
         className="flex flex-col h-full cursor-pointer"
         data-testid={`card-${a.slug}`}
       >
@@ -27,8 +21,9 @@ export function ArticleCard({ a, showCategory = true }) {
           <img
             src={a.hero_image || HERO_FALLBACK}
             alt={a.title}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
             decoding="async"
+            fetchPriority={priority ? 'high' : 'auto'}
             className="w-full h-full object-cover"
           />
           {showCategory && (
@@ -82,7 +77,7 @@ export function DeskTabs({ active }) {
     <nav className="border-b-2 border-foreground flex overflow-x-auto">
       <Link
         href="/"
-        prefetch
+        prefetch={false}
         className={`shrink-0 px-4 py-2.5 overline border-r-2 border-foreground hover:bg-muted hover:text-primary transition-colors duration-100 ${
           !active ? 'text-primary bg-muted' : ''
         }`}
@@ -93,7 +88,7 @@ export function DeskTabs({ active }) {
         <Link
           key={d.slug}
           href={`/category/${d.slug}`}
-          prefetch
+          prefetch={false}
           className={`shrink-0 px-4 py-2.5 overline hover:bg-muted hover:text-primary transition-colors duration-100 ${
             i < DESKS.length - 1 ? 'border-r-2 border-foreground' : ''
           } ${active === d.slug ? 'text-primary bg-muted' : ''}`}

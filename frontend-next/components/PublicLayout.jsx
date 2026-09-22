@@ -17,11 +17,26 @@ const NAV = [
   { slug: 'data', name: 'Data' },
 ];
 
-function Ticker() {
-  const [items, setItems] = useState([]);
+function Ticker({ items: initialItems }) {
+  const [items, setItems] = useState(initialItems || []);
+
   useEffect(() => {
-    api.get('/articles?limit=6').then((r) => setItems(r.data.items || [])).catch(() => {});
-  }, []);
+    if (initialItems?.length) {
+      setItems(initialItems);
+      return;
+    }
+    let cancelled = false;
+    api
+      .get('/articles?limit=6')
+      .then((r) => {
+        if (!cancelled) setItems(r.data.items || []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [initialItems]);
+
   if (!items.length) return null;
   const tape = [...items, ...items];
   return (
@@ -31,7 +46,7 @@ function Ticker() {
           <Link
             key={`${a.slug}-${i}`}
             href={`/article/${a.slug}`}
-            prefetch
+            prefetch={false}
             className="hover:text-primary shrink-0 relative z-[1] py-0.5"
           >
             <span className="text-primary mr-1.5">■</span>
@@ -100,7 +115,7 @@ function HeaderSearch() {
   );
 }
 
-export default function PublicLayout({ children }) {
+export default function PublicLayout({ children, tickerItems }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -113,7 +128,7 @@ export default function PublicLayout({ children }) {
       <Suspense fallback={null}>
         <RouteChangeSpinner />
       </Suspense>
-      <Ticker />
+      <Ticker items={tickerItems} />
 
       <header className="border-b-2 border-foreground bg-background sticky top-0 z-50">
         <div className="max-w-[1200px] mx-auto px-5 h-14 md:h-16 flex items-center justify-between gap-4">

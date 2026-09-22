@@ -5,10 +5,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Chivo', 'sans-serif'],
-        serif: ['"Cormorant Garamond"', 'serif'],
-        body: ['"IBM Plex Sans"', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        heading: ['var(--font-heading)', 'Chivo', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Cormorant Garamond', 'serif'],
+        body: ['var(--font-body)', 'IBM Plex Sans', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
