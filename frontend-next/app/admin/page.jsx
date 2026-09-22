@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
           <div className="overline flex items-center gap-2">
             <ShieldCheck className="w-3 h-3 text-primary" /> Cookie Consent · GDPR / CCPA
           </div>
-          <Link href="/admin/consent" className="overline hover:text-primary" data-testid="see-consent">
+          <Link href="/admin/cookies-report" className="overline hover:text-primary" data-testid="see-consent">
             View details →
           </Link>
         </div>
@@ -132,10 +132,10 @@ export default function AdminDashboardPage() {
           <div className="font-heading font-bold uppercase text-lg">AI Generate</div>
           <p className="text-sm text-muted-foreground mt-1">Draft an article from a keyword or topic.</p>
         </Link>
-        <Link href="/admin/consent" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-consent">
+        <Link href="/admin/cookies-report" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-consent">
           <ShieldCheck className="w-6 h-6 text-primary mb-3" />
-          <div className="font-heading font-bold uppercase text-lg">Cookie Consent</div>
-          <p className="text-sm text-muted-foreground mt-1">GDPR decisions: accept, reject, analytics rate.</p>
+          <div className="font-heading font-bold uppercase text-lg">GDPR / Cookies</div>
+          <p className="text-sm text-muted-foreground mt-1">Consent, visitors, campaigns, and analytics events.</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

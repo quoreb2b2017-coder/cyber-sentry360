@@ -15,7 +15,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, testid: 'sidebar-dashboard' },
       { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, testid: 'sidebar-analytics' },
-      { to: '/admin/cookies-report', label: 'Cookies & visitors', icon: ShieldCheck, testid: 'sidebar-cookies-report' },
+      { to: '/admin/cookies-report', label: 'GDPR / Cookies', badge: 'Live', icon: ShieldCheck, testid: 'sidebar-cookies-report' },
     ],
   },
   {
@@ -61,8 +61,8 @@ const PAGE_TITLES = {
   '/admin/feeds': 'News Feeds',
   '/admin/newsletter': 'Newsletter',
   '/admin/analytics': 'Analytics',
-  '/admin/cookies-report': 'Cookies & visitors',
-  '/admin/consent': 'Cookies & visitors',
+  '/admin/cookies-report': 'GDPR / Cookies',
+  '/admin/consent': 'GDPR / Cookies',
   '/admin/settings': 'Settings',
   '/admin/profile': 'Profile',
 };
@@ -97,6 +97,11 @@ function SidebarNav({ pathname, onNavigate }) {
                   >
                     <l.icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-primary' : 'text-background/50'}`} />
                     <span className="truncate">{l.label}</span>
+                    {l.badge ? (
+                      <span className="ml-auto shrink-0 font-mono text-[8px] uppercase tracking-widest text-primary border border-primary/40 px-1 py-0.5">
+                        {l.badge}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );

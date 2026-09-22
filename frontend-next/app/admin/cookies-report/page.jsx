@@ -145,7 +145,7 @@ export default function AdminCookiesReportPage() {
           <Cookie className="w-3 h-3" /> GDPR / visitors
         </div>
         <h1 className="font-heading font-black uppercase text-4xl md:text-5xl tracking-tighter">
-          Cookies &amp; visitors
+          GDPR / Cookies
         </h1>
         <p className="mt-2 font-serif italic text-lg text-muted-foreground max-w-2xl">
           First-party page views, consent decisions, campaigns, and approximate geo — admin only. IPs shown are
