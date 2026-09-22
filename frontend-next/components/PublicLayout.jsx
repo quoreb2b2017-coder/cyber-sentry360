@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { Search as SearchIcon, Menu, X, ArrowRight } from 'lucide-react';
 import { NewsletterSubscribe } from '@/components/NewsletterSubscribe';
 import RouteChangeSpinner, { signalNavStart } from '@/components/RouteChangeSpinner';
+import { openCookiePreferences } from '@/lib/consent';
 
 const NAV = [
   { slug: 'ai', name: 'AI' },
@@ -222,6 +223,7 @@ export default function PublicLayout({ children }) {
               <div className="overline text-primary mb-3">Explore</div>
               <ul className="space-y-2 font-mono text-[11px] uppercase tracking-wider">
                 <li><Link href="/search" className="hover:text-primary">Archive</Link></li>
+                <li><Link href="/privacy" className="hover:text-primary">Privacy</Link></li>
                 <li><Link href="/unsubscribe" className="hover:text-primary">Unsubscribe</Link></li>
                 <li><Link href="/admin/login" className="hover:text-primary">Newsroom</Link></li>
                 <li><Link href="/category/ai" className="hover:text-primary">Latest AI</Link></li>
@@ -245,6 +247,19 @@ export default function PublicLayout({ children }) {
               <span className="normal-case tracking-wide">Published by Quore B2B Marketing.</span>
             </div>
             <div className="flex flex-wrap items-center gap-4">
+              <Link href="/privacy" className="hover:text-primary transition-colors" data-testid="footer-privacy">
+                Privacy
+              </Link>
+              <span className="hidden sm:inline text-background/40">·</span>
+              <button
+                type="button"
+                onClick={() => openCookiePreferences()}
+                className="hover:text-primary transition-colors uppercase tracking-widest"
+                data-testid="footer-cookie-preferences"
+              >
+                Cookie preferences
+              </button>
+              <span className="hidden sm:inline text-background/40">·</span>
               <Link href="/unsubscribe" className="hover:text-primary transition-colors" data-testid="footer-unsubscribe">
                 Unsubscribe
               </Link>

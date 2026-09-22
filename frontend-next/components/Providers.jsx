@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/lib/auth';
 import { useState } from 'react';
+import CookieConsentChrome from '@/components/CookieConsentChrome';
 
 export default function Providers({ children }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -16,7 +17,10 @@ export default function Providers({ children }) {
   }));
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        {children}
+        <CookieConsentChrome />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
