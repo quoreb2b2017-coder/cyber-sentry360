@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { FileText, Sparkles, Zap, AlertTriangle } from 'lucide-react';
+import { Sparkles, Zap, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 function Stat({ label, value, testid, accent }) {
   return (
@@ -13,11 +13,25 @@ function Stat({ label, value, testid, accent }) {
   );
 }
 
+const EMPTY_CONSENT = {
+  available: false,
+  stats: {
+    total: 0,
+    acceptAll: 0,
+    rejectAll: 0,
+    custom: 0,
+    analyticsRate: 0,
+    marketingRate: 0,
+    acceptRate: 0,
+  },
+};
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0, subs: 0, todayGenerated: 0, failedJobs: 0 });
   const [recent, setRecent] = useState([]);
   const [logs, setLogs] = useState([]);
   const [automation, setAutomation] = useState(null);
+  const [consent, setConsent] = useState(EMPTY_CONSENT);
 
   useEffect(() => {
     Promise.all([
@@ -28,19 +42,29 @@ export default function AdminDashboardPage() {
       setRecent(dash.data.recentPosts || []);
       setLogs(dash.data.recentLogs || []);
       setAutomation(dash.data.automation);
+      if (dash.data.consent) {
+        setConsent({
+          available: !!dash.data.consent.available,
+          stats: { ...EMPTY_CONSENT.stats, ...(dash.data.consent.stats || {}) },
+        });
+      }
     }).catch(() => {
       api.get('/admin/articles', { params: { status: 'all', limit: 500 } }).then((a) => {
         const items = a.data.items || [];
         setStats({
           total: items.length,
-          published: items.filter(x => x.status === 'published').length,
-          drafts: items.filter(x => x.status === 'draft').length,
-          subs: 0, todayGenerated: 0, failedJobs: 0,
+          published: items.filter((x) => x.status === 'published').length,
+          drafts: items.filter((x) => x.status === 'draft').length,
+          subs: 0,
+          todayGenerated: 0,
+          failedJobs: 0,
         });
         setRecent(items.slice(0, 8));
       });
     });
   }, []);
+
+  const cs = consent.stats;
 
   return (
     <div className="p-6 md:p-10 max-w-6xl" data-testid="admin-dashboard">
@@ -65,6 +89,38 @@ export default function AdminDashboardPage() {
         <Stat label="Failed Jobs" value={stats.failedJobs} testid="stat-failed" accent={stats.failedJobs > 0} />
         <Stat label="Traffic" value="-" testid="stat-traffic" />
       </div>
+
+      <div className="brutal-border bg-card mb-10" data-testid="gdpr-consent-panel">
+        <div className="border-b-2 border-foreground p-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="overline flex items-center gap-2">
+            <ShieldCheck className="w-3 h-3 text-primary" /> Cookie Consent · GDPR / CCPA
+          </div>
+          <Link href="/admin/consent" className="overline hover:text-primary" data-testid="see-consent">
+            View details →
+          </Link>
+        </div>
+        {consent.available ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x-0 md:divide-x-2 divide-y-2 md:divide-y-0 divide-foreground">
+            {[
+              { label: 'Decisions (30d)', value: cs.total },
+              { label: 'Accept all', value: `${cs.acceptAll} (${cs.acceptRate}%)` },
+              { label: 'Reject non-essential', value: cs.rejectAll },
+              { label: 'Analytics allowed', value: `${cs.analyticsRate}%` },
+            ].map((item) => (
+              <div key={item.label} className="p-5">
+                <div className="overline text-muted-foreground">{item.label}</div>
+                <div className="mt-2 font-heading font-black text-3xl tracking-tighter">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-5 text-sm text-muted-foreground">
+            Consent logging ready after Supabase migration <span className="font-mono text-xs">006_consent_events.sql</span>.
+            Public Accept / Reject choices will appear here.
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         <Link href="/admin/automation" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all group" data-testid="quick-automation">
           <Zap className="w-6 h-6 text-primary mb-3" />
@@ -76,10 +132,10 @@ export default function AdminDashboardPage() {
           <div className="font-heading font-bold uppercase text-lg">AI Generate</div>
           <p className="text-sm text-muted-foreground mt-1">Draft an article from a keyword or topic.</p>
         </Link>
-        <Link href="/admin/articles/new" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-new">
-          <FileText className="w-6 h-6 text-primary mb-3" />
-          <div className="font-heading font-bold uppercase text-lg">New Post</div>
-          <p className="text-sm text-muted-foreground mt-1">Compose an original piece by hand.</p>
+        <Link href="/admin/consent" className="brutal-border p-6 bg-card hover:shadow-brutal transition-all" data-testid="quick-consent">
+          <ShieldCheck className="w-6 h-6 text-primary mb-3" />
+          <div className="font-heading font-bold uppercase text-lg">Cookie Consent</div>
+          <p className="text-sm text-muted-foreground mt-1">GDPR decisions: accept, reject, analytics rate.</p>
         </Link>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

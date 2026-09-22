@@ -72,8 +72,8 @@ export default function CookieConsentBanner() {
     return () => window.removeEventListener(OPEN_PREFS_EVENT, openPrefs);
   }, []);
 
-  const persist = useCallback((nextAnalytics, nextMarketing) => {
-    saveConsent({ analytics: nextAnalytics, marketing: nextMarketing });
+  const persist = useCallback((nextAnalytics, nextMarketing, choice) => {
+    saveConsent({ analytics: nextAnalytics, marketing: nextMarketing, choice });
     setAnalytics(nextAnalytics);
     setMarketing(nextMarketing);
     setPanelOpen(false);
@@ -127,7 +127,7 @@ export default function CookieConsentBanner() {
                 <button
                   type="button"
                   className="brutal-btn-primary text-[10px] px-4 py-3"
-                  onClick={() => persist(true, true)}
+                  onClick={() => persist(true, true, 'accept_all')}
                   data-testid="cookie-accept-all"
                 >
                   Accept all
@@ -135,7 +135,7 @@ export default function CookieConsentBanner() {
                 <button
                   type="button"
                   className="brutal-btn text-[10px] px-4 py-3"
-                  onClick={() => persist(false, false)}
+                  onClick={() => persist(false, false, 'reject_all')}
                   data-testid="cookie-reject-all"
                 >
                   Reject non-essential
@@ -184,7 +184,7 @@ export default function CookieConsentBanner() {
                 <button
                   type="button"
                   className="brutal-btn-primary text-[10px] px-4 py-3"
-                  onClick={() => persist(analytics, marketing)}
+                  onClick={() => persist(analytics, marketing, 'custom')}
                   data-testid="cookie-save-prefs"
                 >
                   Save preferences
@@ -192,7 +192,7 @@ export default function CookieConsentBanner() {
                 <button
                   type="button"
                   className="brutal-btn text-[10px] px-4 py-3"
-                  onClick={() => persist(true, true)}
+                  onClick={() => persist(true, true, 'accept_all')}
                   data-testid="cookie-accept-all-panel"
                 >
                   Accept all
@@ -200,7 +200,7 @@ export default function CookieConsentBanner() {
                 <button
                   type="button"
                   className="brutal-btn text-[10px] px-4 py-3"
-                  onClick={() => persist(false, false)}
+                  onClick={() => persist(false, false, 'reject_all')}
                   data-testid="cookie-reject-panel"
                 >
                   Reject non-essential

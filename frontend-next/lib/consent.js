@@ -85,7 +85,7 @@ export function hasConsentDecision() {
   return !!getConsent();
 }
 
-export function saveConsent({ analytics, marketing }) {
+export function saveConsent({ analytics, marketing, choice }) {
   const consent = {
     version: CONSENT_VERSION,
     necessary: true,
@@ -110,9 +110,41 @@ export function saveConsent({ analytics, marketing }) {
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: consent }));
+    logConsentToServer({
+      choice: resolveChoice(choice, consent.analytics, consent.marketing),
+      analytics: consent.analytics,
+      marketing: consent.marketing,
+      version: CONSENT_VERSION,
+    });
   }
 
   return consent;
+}
+
+function resolveChoice(choice, analytics, marketing) {
+  if (choice === 'accept_all' || choice === 'reject_all' || choice === 'custom') return choice;
+  if (analytics && marketing) return 'accept_all';
+  if (!analytics && !marketing) return 'reject_all';
+  return 'custom';
+}
+
+function logConsentToServer(payload) {
+  try {
+    const body = JSON.stringify(payload);
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      navigator.sendBeacon('/api/consent', blob);
+      return;
+    }
+    fetch('/api/consent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* ignore logging failures */
+  }
 }
 
 export function openCookiePreferences() {

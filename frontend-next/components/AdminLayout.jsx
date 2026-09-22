@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import {
   LogOut, LayoutDashboard, Sparkles, FileText, Rss, Mail,
   Layers, Search, Zap, BarChart3, Settings, User, ScrollText,
-  Menu, X, ExternalLink, ChevronRight,
+  Menu, X, ExternalLink, ChevronRight, ShieldCheck,
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -15,6 +15,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, testid: 'sidebar-dashboard' },
       { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, testid: 'sidebar-analytics' },
+      { to: '/admin/consent', label: 'Cookie Consent', icon: ShieldCheck, testid: 'sidebar-consent' },
     ],
   },
   {
@@ -60,6 +61,7 @@ const PAGE_TITLES = {
   '/admin/feeds': 'News Feeds',
   '/admin/newsletter': 'Newsletter',
   '/admin/analytics': 'Analytics',
+  '/admin/consent': 'Cookie Consent',
   '/admin/settings': 'Settings',
   '/admin/profile': 'Profile',
 };
