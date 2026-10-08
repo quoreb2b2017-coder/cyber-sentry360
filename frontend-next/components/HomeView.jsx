@@ -17,20 +17,27 @@ export default function HomeView({ articles = [], topics = [] }) {
   return (
     <div className="max-w-[1200px] mx-auto px-5 pb-12" data-testid="home-page">
       <header className="border-b-2 border-foreground py-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
+          <div className="min-w-0">
             <div className="overline text-primary mb-1.5">Issue · {issueDate}</div>
             <h1 className="font-heading font-black uppercase text-3xl md:text-[2.5rem] tracking-tighter leading-none">
               The Signal <span className="text-primary">·</span> Not the Noise
             </h1>
+            <p className="mt-3 lead-muted max-w-lg">
+              Rigorous AI &amp; cybersecurity reporting for builders and CISOs.
+            </p>
           </div>
-          <Link href="/search" prefetch={false} className="brutal-btn text-[10px] px-3 py-2 gap-2">
-            <Search className="w-3.5 h-3.5" /> Search archive
-          </Link>
+          <div className="w-full md:w-[300px] shrink-0 flex flex-col gap-3">
+            <Link
+              href="/search"
+              prefetch={false}
+              className="brutal-btn text-[10px] px-3 py-2 gap-2 self-start md:self-end"
+            >
+              <Search className="w-3.5 h-3.5" /> Search archive
+            </Link>
+            <NewsletterSubscribe testid="header-newsletter" />
+          </div>
         </div>
-        <p className="mt-3 lead-muted max-w-lg">
-          Rigorous AI &amp; cybersecurity reporting for builders and CISOs.
-        </p>
       </header>
 
       <div className="-mt-[2px]">
