@@ -27,11 +27,11 @@ export default function HomeView({ articles = [], topics = [] }) {
               Rigorous AI &amp; cybersecurity reporting for builders and CISOs.
             </p>
           </div>
-          <div className="w-full md:w-[300px] shrink-0 flex flex-col gap-3">
+          <div className="w-full md:w-[300px] shrink-0 flex flex-col gap-2">
             <Link
               href="/search"
               prefetch={false}
-              className="brutal-btn text-[10px] px-3 py-2 gap-2 self-start md:self-end"
+              className="brutal-btn w-full justify-center text-[10px] px-3 py-2 gap-2"
             >
               <Search className="w-3.5 h-3.5" /> Search archive
             </Link>
