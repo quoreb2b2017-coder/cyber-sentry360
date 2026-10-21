@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { api } from '@/lib/api';
-import { Search as SearchIcon, Menu, X, ArrowRight } from 'lucide-react';
+import { Search as SearchIcon, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
+import { RESOURCE_MENU } from '@/lib/resources';
 import { NewsletterSubscribe } from '@/components/NewsletterSubscribe';
 import RouteChangeSpinner, { signalNavStart } from '@/components/RouteChangeSpinner';
 import CookiePreferencesTrigger from '@/components/CookiePreferencesTrigger';
@@ -158,6 +159,24 @@ export default function PublicLayout({ children, tickerItems }) {
                 {c.name}
               </Link>
             ))}
+            <div className="relative group">
+              <Link
+                href="/resources"
+                className={`px-3 py-1.5 inline-flex items-center gap-1 hover:text-primary ${
+                  pathname.startsWith('/resources') || pathname.startsWith('/blog') ? 'text-primary' : ''
+                }`}
+                data-testid="nav-resources"
+              >
+                Resources <ChevronDown className="w-3 h-3" />
+              </Link>
+              <div className="absolute right-0 top-full hidden group-hover:block group-focus-within:block bg-background border-2 border-foreground min-w-[190px] z-50">
+                {RESOURCE_MENU.map((item) => (
+                  <Link key={item.key} href={item.href} className="block px-3 py-2 hover:bg-muted hover:text-primary whitespace-nowrap">
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -196,6 +215,14 @@ export default function PublicLayout({ children, tickerItems }) {
                   }`}
                 >
                   {c.name}
+                </Link>
+              ))}
+              <Link href="/resources" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
+                Resources
+              </Link>
+              {RESOURCE_MENU.map((item) => (
+                <Link key={item.key} href={item.href} className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
+                  {item.label}
                 </Link>
               ))}
               <Link href="/search" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary col-span-2 border-t border-muted mt-1 pt-3">

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolveLeadSource, saveLeadSource } from '@/lib/lead-source';
 import { getAdminClient } from '@/lib/supabase/admin';
 
 function normalizeEmail(email: unknown): string | null {
@@ -18,6 +19,19 @@ export async function POST(request: Request) {
     }
 
     const db = getAdminClient();
+    const { data: existing } = await db
+      .from('newsletter_subscribers')
+      .select('email, status')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existing?.status === 'subscribed') {
+      return NextResponse.json(
+        { detail: 'This email is already subscribed. Enter a new email.', already: true },
+        { status: 409 }
+      );
+    }
+
     const now = new Date().toISOString();
     const { data, error } = await db
       .from('newsletter_subscribers')
@@ -37,7 +51,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ detail: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, subscribed: true, subscriber: data });
+    const source = await resolveLeadSource(db, body);
+    const sourceError = await saveLeadSource(db, email, source);
+    if (sourceError) {
+      return NextResponse.json({ detail: sourceError }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, subscribed: true, subscriber: data, source });
   } catch (err) {
     return NextResponse.json({ detail: String(err) }, { status: 500 });
   }

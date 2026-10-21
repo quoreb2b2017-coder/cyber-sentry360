@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     const { data: existing } = await db
       .from('newsletter_subscribers')
-      .select('email, status')
+      .select('email, status, unsubscribe_reason')
       .eq('email', email)
       .maybeSingle();
 
@@ -40,7 +40,16 @@ export async function POST(request: Request) {
       unsubscribed_at: now,
     };
     // Optional insight — ignored if column does not exist yet
-    if (reason) updates.unsubscribe_reason = reason;
+    if (reason) {
+      let next: string = reason;
+      try {
+        const parsed = JSON.parse(String(existing.unsubscribe_reason || ''));
+        if (parsed && parsed.kind === 'lead-source') next = JSON.stringify({ ...parsed, reason });
+      } catch {
+        /* keep the typed reason */
+      }
+      updates.unsubscribe_reason = next;
+    }
 
     let { error } = await db.from('newsletter_subscribers').update(updates).eq('email', email);
 

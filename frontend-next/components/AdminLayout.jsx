@@ -4,9 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import {
-  LogOut, LayoutDashboard, Sparkles, FileText, Rss, Mail,
+  LogOut, LayoutDashboard, Sparkles, FileText, Rss, Mail, Download,
   Layers, Search, Zap, BarChart3, Settings, User, ScrollText,
-  Menu, X, ExternalLink, ChevronRight, Cookie, Scale,
+  Menu, X, ExternalLink, ChevronRight, Cookie, Scale, Library,
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -23,6 +23,7 @@ const NAV_GROUPS = [
     label: 'Content',
     items: [
       { to: '/admin/articles', label: 'Posts', icon: FileText, testid: 'sidebar-articles' },
+      { to: '/admin/white-papers', label: 'White Papers', icon: Library, testid: 'sidebar-white-papers' },
       { to: '/admin/generate', label: 'AI Generate', icon: Sparkles, testid: 'sidebar-generate' },
       { to: '/admin/seo', label: 'SEO & Geo', icon: Search, testid: 'sidebar-seo' },
     ],
@@ -39,7 +40,8 @@ const NAV_GROUPS = [
     label: 'Audience',
     items: [
       { to: '/admin/feeds', label: 'News Feeds', icon: Rss, testid: 'sidebar-feeds' },
-      { to: '/admin/newsletter', label: 'Newsletter', icon: Mail, testid: 'sidebar-newsletter' },
+      { to: '/admin/newsletter', label: 'Subscribes', icon: Mail, testid: 'sidebar-subscribes', hash: '' },
+      { to: '/admin/newsletter#downloads', label: 'Downloads', icon: Download, testid: 'sidebar-downloads', hash: '#downloads' },
     ],
   },
   {
@@ -54,13 +56,14 @@ const NAV_GROUPS = [
 const PAGE_TITLES = {
   '/admin': 'Dashboard',
   '/admin/articles': 'Posts',
+  '/admin/white-papers': 'White Papers',
   '/admin/generate': 'AI Generate',
   '/admin/seo': 'SEO & Geo',
   '/admin/automation': 'Automation',
   '/admin/services': 'Services',
   '/admin/logs': 'Logs',
   '/admin/feeds': 'News Feeds',
-  '/admin/newsletter': 'Newsletter',
+  '/admin/newsletter': 'Subscribes',
   '/admin/analytics': 'Analytics',
   '/admin/cookies-report': 'Cookies',
   '/admin/gdpr': 'GDPR',
@@ -75,6 +78,15 @@ function isActive(pathname, item) {
 }
 
 function SidebarNav({ pathname, onNavigate }) {
+  const [hash, setHash] = useState('');
+
+  useEffect(() => {
+    const read = () => setHash(window.location.hash);
+    read();
+    window.addEventListener('hashchange', read);
+    return () => window.removeEventListener('hashchange', read);
+  }, [pathname]);
+
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
       {NAV_GROUPS.map((group) => (
@@ -84,7 +96,9 @@ function SidebarNav({ pathname, onNavigate }) {
           </div>
           <ul className="space-y-0.5">
             {group.items.map((l) => {
-              const active = isActive(pathname, l);
+              const active = l.hash != null
+                ? (pathname === '/admin/newsletter' && (l.hash ? hash === l.hash : hash !== '#downloads'))
+                : isActive(pathname, l);
               return (
                 <li key={l.to}>
                   <Link

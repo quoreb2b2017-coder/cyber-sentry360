@@ -46,9 +46,20 @@ export async function DELETE(request: Request) {
   if (id) query = query.eq('id', id);
   else query = query.eq('email', email.toLowerCase().trim());
 
-  const { error } = await query;
+  const { data, error } = await query.select('id');
   if (error) {
     return NextResponse.json({ detail: error.message }, { status: 500 });
+  }
+  if (!data?.length) {
+    return NextResponse.json({ detail: 'Subscriber was not in the database' }, { status: 404 });
+  }
+
+  const dbCheck = getAdminClient();
+  let still = dbCheck.from('newsletter_subscribers').select('id');
+  still = id ? still.eq('id', id) : still.eq('email', email.toLowerCase().trim());
+  const { data: leftover } = await still.maybeSingle();
+  if (leftover) {
+    return NextResponse.json({ detail: 'Delete did not remove the database row' }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
