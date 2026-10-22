@@ -10,7 +10,8 @@ export async function GET(request: Request) {
   const { data } = await db
     .from('newsletter_subscribers')
     .select('*')
-    .order('subscribed_at', { ascending: false });
+    .order('subscribed_at', { ascending: false })
+    .limit(500);
 
   return NextResponse.json({
     items: data || [],

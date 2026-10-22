@@ -17,7 +17,6 @@ export const UPLOAD_CATEGORIES = [
   { slug: 'report', label: 'Report' },
   { slug: 'case_study', label: 'Case study' },
   { slug: 'webinar', label: 'Webinar' },
-  { slug: 'guide', label: 'Guide' },
 ];
 
 /** Public Resources menu. Do not reorder or add types. */
@@ -37,7 +36,7 @@ export const RESOURCE_MENU = [
     key: 'whitepaper',
     number: '02',
     label: 'White papers',
-    href: '/resources/whitepapers?type=whitepaper',
+    href: '/resources/whitepapers',
     path: '/resources/whitepapers',
     category: 'whitepaper',
     badge: 'White papers',
@@ -75,11 +74,11 @@ export const RESOURCE_MENU = [
     label: 'Guides',
     href: '/resources/guides',
     path: '/resources/guides',
-    category: 'guide',
     badge: 'Guides',
     heading: 'Guides',
-    paragraph: 'Practical guides published with the Guide category. The page stays on Coming soon until one is saved.',
-    pillars: ['Coming soon', 'Not filled with blogs', 'Published guides only'],
+    category: null,
+    paragraph: 'Guides are not a download type. This page stays on Coming soon. Blog posts are not listed here.',
+    pillars: ['Coming soon', 'No guide upload', 'Blogs stay in Blogs'],
   },
   {
     key: 'webinar',
@@ -95,27 +94,56 @@ export const RESOURCE_MENU = [
   },
 ];
 
+export const DOWNLOAD_FIELD_OPTIONS = [
+  { key: 'zip', label: 'Zip/Postal Code', type: 'text' },
+  { key: 'phone', label: 'Phone', type: 'tel' },
+  { key: 'first_name', label: 'First name', type: 'text' },
+  { key: 'last_name', label: 'Last name', type: 'text' },
+  { key: 'job_title', label: 'Job title', type: 'text' },
+  { key: 'street', label: 'Street address', type: 'text' },
+  { key: 'suite', label: 'Suite / office', type: 'text' },
+  { key: 'city', label: 'City', type: 'text' },
+  { key: 'state', label: 'State / province', type: 'text' },
+  { key: 'country', label: 'Country', type: 'text' },
+];
+
 export const DEFAULT_DOWNLOAD_FIELDS = [
   { label: 'Zip/Postal Code', key: 'zip', type: 'text', required: true },
   { label: 'Phone', key: 'phone', type: 'tel', required: true },
 ];
 
+const PERSONAL_INBOXES = new Set([
+  'gmail.com', 'googlemail.com',
+  'yahoo.com', 'ymail.com', 'rocketmail.com',
+  'outlook.com', 'hotmail.com', 'live.com', 'msn.com',
+  'icloud.com', 'me.com', 'mac.com',
+  'aol.com', 'aim.com',
+  'proton.me', 'protonmail.com', 'pm.me',
+  'gmx.com', 'gmx.net', 'mail.com', 'inbox.com',
+]);
+
 export function defaultFormConfig() {
   return {
     fields: null,
-    explicitEmptyFields: false,
     consent: {
-      emailNote: `We email this download from ${SITE_NAME}. You can unsubscribe at any time.`,
-      checks: [
-        { text: 'I agree to receive this download by email.', required: true, visible: true },
-        { text: `I agree to the {${SITE_NAME} Privacy Policy}.`, href: '/privacy', required: true, visible: true },
-        { text: `${SITE_NAME} may contact me about related research.`, required: true, visible: true },
-      ],
+      emailNote: 'Company email only. Not Gmail, Yahoo, Outlook, or other personal addresses.',
+      terms: {
+        text: `I agree to ${SITE_NAME}'s {{terms}}, {{privacy}}, and the transfer of my information to the United States for processing to provide me with relevant information as described in our {{privacy}}.`,
+        visible: true,
+        required: true,
+      },
+      partners: {
+        text: `I agree to my information being processed by ${SITE_NAME} and its partners to contact me via phone, email or other means regarding information relevant to my professional interests. I may {{unsubscribe}} at any time.`,
+        visible: true,
+        required: true,
+      },
+      optOut: {
+        text: `**Optional:** check this box only if you want to **opt out of further emails** from ${SITE_NAME}. Leave it unchecked to keep receiving relevant updates. Read our {{privacy-statement}}.`,
+        visible: true,
+        required: false,
+      },
       extra: [],
-      footerLine: `Brought to you through ${SITE_NAME}.`,
-      showEmailNote: true,
-      showChecks: true,
-      showFooter: true,
+      footerLine: 'I have read and understood privacy statement of {{publisher}}.',
     },
     questions: [],
   };
@@ -137,64 +165,116 @@ export function sectionByPath(section) {
     guides: 'guide',
     webinars: 'webinar',
   };
-  const category = map[section];
-  return RESOURCE_MENU.find((s) => s.category === category) || null;
+  const key = map[section];
+  return RESOURCE_MENU.find((s) => s.key === key) || null;
+}
+
+export function fieldOption(key) {
+  return DOWNLOAD_FIELD_OPTIONS.find((option) => option.key === key) || null;
+}
+
+export function savedDownloadFields(formConfig) {
+  const cfg = formConfig && typeof formConfig === 'object' ? formConfig : {};
+  if (!Array.isArray(cfg.fields)) return DEFAULT_DOWNLOAD_FIELDS.map((field) => ({ ...field }));
+  const seen = new Set();
+  const fields = [];
+  cfg.fields.slice(0, 12).forEach((field) => {
+    const option = fieldOption(field && field.key);
+    if (!option || seen.has(option.key)) return;
+    seen.add(option.key);
+    fields.push({
+      key: option.key,
+      label: option.label,
+      type: option.type,
+      required: field.required !== false,
+    });
+  });
+  return fields;
+}
+
+/** Step 2 fields after the always-on first and last name. */
+export function publicStepFields(formConfig) {
+  return savedDownloadFields(formConfig).filter((field) => field.key !== 'first_name' && field.key !== 'last_name');
 }
 
 export function publicFields(formConfig) {
+  return publicStepFields(formConfig);
+}
+
+export function isOptOutCopy(text) {
+  return /\bopt[\s-]*out\b/i.test(String(text || ''));
+}
+
+function consentBlock(source, key, fallback, required) {
+  const row = source && source[key] && typeof source[key] === 'object' ? source[key] : fallback;
+  return {
+    text: String(row.text || fallback.text || ''),
+    visible: row.visible !== false,
+    required,
+  };
+}
+
+export function publicConsent(formConfig) {
   const cfg = formConfig && typeof formConfig === 'object' ? formConfig : {};
-  if (Array.isArray(cfg.fields) && cfg.fields.length > 0) {
-    return cfg.fields
-      .filter((f) => f && f.label && f.key)
-      .map((f) => ({
-        label: String(f.label).slice(0, 80),
-        key: String(f.key).slice(0, 40),
-        type: ['text', 'tel', 'email'].includes(f.type) ? f.type : 'text',
-        required: f.required !== false,
-      }));
-  }
-  if (cfg.explicitEmptyFields) return [];
-  return DEFAULT_DOWNLOAD_FIELDS;
+  const defaults = defaultFormConfig().consent;
+  const saved = cfg.consent && typeof cfg.consent === 'object' ? cfg.consent : {};
+  const modern = saved.terms || saved.partners || saved.optOut;
+  const source = modern ? saved : defaults;
+  const terms = consentBlock(source, 'terms', defaults.terms, true);
+  const partners = consentBlock(source, 'partners', defaults.partners, true);
+  const optOut = consentBlock(source, 'optOut', defaults.optOut, false);
+  const extra = Array.isArray(source.extra) ? source.extra : [];
+  const checks = [];
+  if (terms.visible && terms.text) checks.push({ id: 'terms', text: terms.text, required: true, optOut: false });
+  if (partners.visible && partners.text) checks.push({ id: 'partners', text: partners.text, required: true, optOut: false });
+  if (optOut.visible && optOut.text) checks.push({ id: 'optOut', text: optOut.text, required: false, optOut: true });
+  extra.slice(0, 8).forEach((row, index) => {
+    const text = String(row?.text || '').trim();
+    if (!text) return;
+    const optOutCopy = isOptOutCopy(text);
+    checks.push({ id: `extra-${index}`, text, required: optOutCopy ? false : !!row.required, optOut: optOutCopy });
+  });
+  return {
+    emailNote: String(source.emailNote || defaults.emailNote),
+    checks,
+    footerLine: String(source.footerLine || defaults.footerLine),
+  };
 }
 
-function safeHref(href) {
-  const value = String(href || '').trim();
-  if (value.startsWith('/') || value.startsWith('https://') || value.startsWith('http://')) return value;
-  return '';
+export function isPersonalEmail(email) {
+  const domain = String(email || '').toLowerCase().trim().split('@')[1] || '';
+  if (!domain || !domain.includes('.')) return true;
+  if (PERSONAL_INBOXES.has(domain)) return true;
+  const host = domain.split('.')[0];
+  return ['yahoo', 'hotmail', 'outlook', 'live', 'aol', 'gmx'].includes(host);
 }
 
-/** `{words}` uses href. `{words|/privacy}` carries its own URL. `[words](/privacy)` still works. */
-export function consentParts(text, href) {
-  const raw = String(text || '');
-  const fallback = safeHref(href) || '/privacy';
-  const re = /\[([^\]]+)\]\(([^)\s]+)\)|\{([^{}|]+)\|([^{}]+)\}|\{([^{}]+)\}/g;
+const CONSENT_TOKENS = {
+  terms: { label: 'Terms of Use', href: '/terms' },
+  privacy: { label: 'Privacy Policy', href: '/privacy' },
+  'privacy-statement': { label: 'privacy statement', href: '/privacy' },
+  unsubscribe: { label: 'unsubscribe', href: '/unsubscribe' },
+};
+
+/** {{terms}} {{privacy}} {{privacy-statement}} {{unsubscribe}} {{publisher}} and **bold**. */
+export function consentParts(text) {
+  const raw = String(text || '').replaceAll('{{publisher}}', SITE_NAME).replaceAll('Compare Bazaar', SITE_NAME);
+  const re = /\{\{([a-z0-9-]+)\}\}|\*\*([^*]+)\*\*/g;
   const chunks = [];
   let last = 0;
   let match;
   while ((match = re.exec(raw))) {
     if (match.index > last) chunks.push({ type: 'text', value: raw.slice(last, match.index) });
     if (match[1]) {
-      const linkHref = safeHref(match[2]);
-      chunks.push(linkHref ? { type: 'link', label: match[1], href: linkHref } : { type: 'text', value: match[1] });
-    } else if (match[3]) {
-      const linkHref = safeHref(match[4]);
-      chunks.push(linkHref ? { type: 'link', label: match[3], href: linkHref } : { type: 'text', value: match[3] });
+      const token = CONSENT_TOKENS[match[1]];
+      chunks.push(token ? { type: 'link', label: token.label, href: token.href } : { type: 'text', value: match[0] });
     } else {
-      chunks.push({ type: 'link', label: match[5], href: fallback });
+      chunks.push({ type: 'bold', value: match[2] });
     }
     last = match.index + match[0].length;
   }
   if (last < raw.length) chunks.push({ type: 'text', value: raw.slice(last) });
-
-  return chunks.flatMap((part) => {
-    if (part.type !== 'text' || !/privacy policy/i.test(part.value)) return [part];
-    const bits = part.value.split(/(Privacy Policy)/i);
-    return bits.filter(Boolean).map((bit) => (
-      /^privacy policy$/i.test(bit)
-        ? { type: 'link', label: bit, href: fallback }
-        : { type: 'text', value: bit }
-    ));
-  });
+  return chunks;
 }
 
 export function slugifyResource(text) {

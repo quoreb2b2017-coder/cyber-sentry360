@@ -38,8 +38,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   try {
     const form = await request.formData();
     const title = String(form.get('title') || existing.title || '').trim();
+    const description = String(form.get('description') || '').trim();
     const category = String(form.get('category') || existing.category);
     const vertical = String(form.get('vertical') || existing.vertical);
+    if (!title) return NextResponse.json({ detail: 'Title is required' }, { status: 400 });
+    if (!description) return NextResponse.json({ detail: 'Description is required' }, { status: 400 });
+    if (description.length > 220) return NextResponse.json({ detail: 'Description must be 220 characters or fewer' }, { status: 400 });
     if (!isUploadCategory(category)) return NextResponse.json({ detail: 'Category is required' }, { status: 400 });
     if (!isVertical(vertical)) return NextResponse.json({ detail: 'Vertical is required' }, { status: 400 });
 
@@ -47,6 +51,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const cover = form.get('cover');
     const pdfFile = pdf instanceof File && pdf.size > 0 ? await uploadFile(pdf, 'pdf') : null;
     const coverFile = cover instanceof File && cover.size > 0 ? await uploadFile(cover, 'covers') : null;
+    if (!coverFile && !existing.cover_url) {
+      return NextResponse.json({ detail: 'Thumbnail is required' }, { status: 400 });
+    }
 
     let formConfig = existing.form_config;
     try {
@@ -72,7 +79,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     const patch = {
       title,
-      description: String(form.get('description') || '').slice(0, 500),
+      description,
       offered_by: String(form.get('offeredBy') || SITE_NAME).slice(0, 120),
       author: String(form.get('author') || '').slice(0, 120),
       category,

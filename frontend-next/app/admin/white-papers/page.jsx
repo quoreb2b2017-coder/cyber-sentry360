@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import {
   DEFAULT_DOWNLOAD_FIELDS,
+  DOWNLOAD_FIELD_OPTIONS,
   SITE_NAME,
   UPLOAD_CATEGORIES,
   VERTICALS,
@@ -11,30 +12,33 @@ import {
   verticalLabel,
 } from '@/lib/resources';
 
-const EMPTY = {
-  title: '',
-  description: '',
-  offeredBy: SITE_NAME,
-  author: '',
-  category: 'whitepaper',
-  vertical: 'ai',
-  slug: '',
-  metaTitle: '',
-  metaDescription: '',
-  keywords: '',
-  overview: '',
-  insideSections: [{ heading: '', body: '' }],
-  explicitEmptyFields: false,
-  fields: DEFAULT_DOWNLOAD_FIELDS.map((f) => ({ ...f })),
-  emailNote: defaultFormConfig().consent.emailNote,
-  checks: defaultFormConfig().consent.checks.map((c) => ({ ...c })),
-  extra: [],
-  footerLine: defaultFormConfig().consent.footerLine,
-  showEmailNote: true,
-  showChecks: true,
-  showFooter: true,
-  questions: [],
-};
+const CONSENT = defaultFormConfig().consent;
+
+function blankForm() {
+  return {
+    title: '',
+    description: '',
+    offeredBy: SITE_NAME,
+    author: '',
+    category: 'whitepaper',
+    vertical: 'ai',
+    slug: '',
+    metaTitle: '',
+    metaDescription: '',
+    keywords: '',
+    overview: '',
+    insideSections: [{ heading: '', body: '' }],
+    fields: DEFAULT_DOWNLOAD_FIELDS.map((f) => ({ ...f })),
+    emailNote: CONSENT.emailNote,
+    terms: { ...CONSENT.terms },
+    partners: { ...CONSENT.partners },
+    optOut: { ...CONSENT.optOut },
+    extra: [],
+    footerLine: CONSENT.footerLine,
+    questions: [],
+    seoMode: 'manual',
+  };
+}
 
 function Field({ label, children }) {
   return (
@@ -47,35 +51,39 @@ function Field({ label, children }) {
 
 const inputClass = 'w-full border-2 border-foreground bg-background px-3 py-2 text-sm';
 
-function CheckLinkRow({ check, onChange, onRemove }) {
-  const putBraces = () => {
-    const text = check.text || '';
-    if (text.includes('{')) {
-      onChange({ ...check, href: check.href || '/privacy' });
-      return;
-    }
-    const next = text.trim() ? `${text} {}` : 'I agree to the {link text}.';
-    onChange({ ...check, text: next, href: check.href || '/privacy' });
-  };
-
+function VerticalSelect({ value, onChange }) {
+  const [query, setQuery] = useState('');
+  const [openList, setOpenList] = useState(false);
+  const selected = VERTICALS.find((v) => v.slug === value);
+  const q = query.trim().toLowerCase();
+  const options = VERTICALS.filter((v) => !q || v.label.toLowerCase().includes(q));
   return (
-    <div className="space-y-1 border-2 border-foreground p-2 bg-background">
-      <input className={inputClass} value={check.text || ''} placeholder="I agree to the {link text}." onChange={(e) => onChange({ ...check, text: e.target.value })} />
-      <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={putBraces}>Put {'{ }'}</button>
-      <input className={inputClass} value={check.href || ''} placeholder="URL for the words inside { }" onChange={(e) => onChange({ ...check, href: e.target.value })} />
-      <label className="text-xs flex gap-3">
-        {onRemove ? null : (
-          <span className="inline-flex items-center gap-1">
-            <input type="checkbox" checked={check.visible !== false} onChange={(e) => onChange({ ...check, visible: e.target.checked })} /> Show
-          </span>
-        )}
-        <span className="inline-flex items-center gap-1">
-          <input type="checkbox" checked={!!check.required} onChange={(e) => onChange({ ...check, required: e.target.checked })} /> Required
-        </span>
-        {onRemove ? (
-          <button type="button" className="underline" onClick={onRemove}>Remove</button>
-        ) : null}
-      </label>
+    <div className="relative">
+      <input
+        className={inputClass}
+        value={openList ? query : (selected?.label || '')}
+        placeholder="Search verticals"
+        onFocus={() => { setOpenList(true); setQuery(''); }}
+        onChange={(e) => { setQuery(e.target.value); setOpenList(true); }}
+        onBlur={() => setTimeout(() => setOpenList(false), 150)}
+        aria-label="Vertical"
+      />
+      {openList ? (
+        <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-auto border-2 border-foreground bg-background">
+          {options.map((v) => (
+            <li key={v.slug}>
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                onMouseDown={() => { onChange(v.slug); setQuery(''); setOpenList(false); }}
+              >
+                {v.label}
+              </button>
+            </li>
+          ))}
+          {options.length === 0 ? <li className="px-3 py-2 text-sm text-muted-foreground">No matching vertical</li> : null}
+        </ul>
+      ) : null}
     </div>
   );
 }
@@ -84,7 +92,7 @@ export default function AdminWhitePapersPage() {
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(blankForm);
   const [pdf, setPdf] = useState(null);
   const [cover, setCover] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -111,7 +119,7 @@ export default function AdminWhitePapersPage() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ ...EMPTY, fields: DEFAULT_DOWNLOAD_FIELDS.map((f) => ({ ...f })), checks: defaultFormConfig().consent.checks.map((c) => ({ ...c })), extra: [], questions: [], insideSections: [{ heading: '', body: '' }] });
+    setForm(blankForm());
     setPdf(null);
     setCover(null);
     setError('');
@@ -137,14 +145,16 @@ export default function AdminWhitePapersPage() {
     const item = data.item;
     const cfg = item.form_config || {};
     const consent = cfg.consent || {};
+    const modern = consent.terms || consent.partners || consent.optOut;
+    const category = UPLOAD_CATEGORIES.some((c) => c.slug === item.category) ? item.category : 'whitepaper';
     setEditing(item);
     setForm({
-      ...EMPTY,
+      ...blankForm(),
       title: item.title || '',
-      description: item.description || '',
+      description: String(item.description || '').slice(0, 220),
       offeredBy: item.offered_by || SITE_NAME,
       author: item.author || '',
-      category: item.category,
+      category,
       vertical: item.vertical,
       slug: item.slug || '',
       metaTitle: item.meta_title || '',
@@ -152,20 +162,17 @@ export default function AdminWhitePapersPage() {
       keywords: (item.keywords || []).join(', '),
       overview: item.overview || '',
       insideSections: item.inside_sections?.length ? item.inside_sections : [{ heading: '', body: '' }],
-      explicitEmptyFields: !!cfg.explicitEmptyFields && !(Array.isArray(cfg.fields) && cfg.fields.length),
-      fields: Array.isArray(cfg.fields) && cfg.fields.length
+      fields: Array.isArray(cfg.fields)
         ? cfg.fields
-        : cfg.explicitEmptyFields
-          ? []
-          : DEFAULT_DOWNLOAD_FIELDS.map((f) => ({ ...f })),
-      emailNote: consent.emailNote || EMPTY.emailNote,
-      checks: consent.checks?.length ? consent.checks : EMPTY.checks,
-      extra: consent.extra || [],
-      footerLine: consent.footerLine || EMPTY.footerLine,
-      showEmailNote: consent.showEmailNote !== false,
-      showChecks: consent.showChecks !== false,
-      showFooter: consent.showFooter !== false,
+        : DEFAULT_DOWNLOAD_FIELDS.map((f) => ({ ...f })),
+      emailNote: modern ? (consent.emailNote ?? CONSENT.emailNote) : CONSENT.emailNote,
+      terms: modern ? { ...CONSENT.terms, ...consent.terms } : { ...CONSENT.terms },
+      partners: modern ? { ...CONSENT.partners, ...consent.partners } : { ...CONSENT.partners },
+      optOut: modern ? { ...CONSENT.optOut, ...consent.optOut } : { ...CONSENT.optOut },
+      extra: modern ? (consent.extra || []) : [],
+      footerLine: modern ? (consent.footerLine ?? CONSENT.footerLine) : CONSENT.footerLine,
       questions: (cfg.questions || []).map((q) => ({ question: q.question, optionsText: (q.options || []).join('\n') })),
+      seoMode: 'manual',
     });
     setPdf(null);
     setCover(null);
@@ -219,19 +226,19 @@ export default function AdminWhitePapersPage() {
       body.set('keywords', form.keywords);
       body.set('overview', form.overview);
       body.set('insideSections', JSON.stringify(form.insideSections.filter((s) => s.heading || s.body)));
-      const filledFields = form.fields.filter((f) => f.label && f.key);
-      const emptyFields = !!form.explicitEmptyFields && filledFields.length === 0;
+      if (!form.description.trim()) throw new Error('Description is required');
+      if (form.description.trim().length > 220) throw new Error('Description must be 220 characters or fewer');
+      if (!pdf && !editing) throw new Error('PDF file is required');
+      if (!cover && !(editing && editing.cover_url)) throw new Error('Thumbnail is required');
       body.set('formConfig', JSON.stringify({
-        explicitEmptyFields: emptyFields,
-        fields: emptyFields ? [] : filledFields,
+        fields: form.fields.filter((f) => f.key).slice(0, 12),
         consent: {
           emailNote: form.emailNote,
-          checks: form.checks.slice(0, 3),
+          terms: { ...form.terms, required: true },
+          partners: { ...form.partners, required: true },
+          optOut: { ...form.optOut, required: false },
           extra: form.extra.slice(0, 8),
           footerLine: form.footerLine,
-          showEmailNote: form.showEmailNote,
-          showChecks: form.showChecks,
-          showFooter: form.showFooter,
         },
         questions: form.questions.filter((q) => q.question).map((q) => ({
           question: q.question,
@@ -245,7 +252,7 @@ export default function AdminWhitePapersPage() {
       setOpen(false);
       load();
     } catch (err) {
-      setError(err?.response?.data?.detail || 'Save failed');
+      setError(err?.response?.data?.detail || err?.message || 'Save failed');
     } finally {
       setBusy(false);
     }
@@ -313,122 +320,192 @@ export default function AdminWhitePapersPage() {
               <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => setOpen(false)}>Close</button>
             </div>
 
-            <section className="brutal-border p-4 space-y-3 bg-muted">
-              <h3 className="font-heading font-bold uppercase text-sm">Public download form</h3>
-              <p className="text-xs text-foreground/70">This is what visitors fill in before Download Now.</p>
-              {form.fields.map((field, i) => (
-                <div key={i} className="grid grid-cols-2 gap-2">
-                  <input className={inputClass} placeholder="Label" value={field.label} onChange={(e) => {
-                    const fields = [...form.fields]; fields[i] = { ...field, label: e.target.value }; set('fields', fields);
-                  }} />
-                  <input className={inputClass} placeholder="key" value={field.key} onChange={(e) => {
-                    const fields = [...form.fields]; fields[i] = { ...field, key: e.target.value }; set('fields', fields);
-                  }} />
-                  <select className={inputClass} value={field.type} onChange={(e) => {
-                    const fields = [...form.fields]; fields[i] = { ...field, type: e.target.value }; set('fields', fields);
-                  }}>
-                    <option value="text">text</option>
-                    <option value="tel">tel</option>
-                    <option value="email">email</option>
-                  </select>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={!!field.required} onChange={(e) => {
-                      const fields = [...form.fields]; fields[i] = { ...field, required: e.target.checked }; set('fields', fields);
-                    }} /> Required
-                  </label>
-                </div>
-              ))}
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => set('fields', [...form.fields, { label: '', key: '', type: 'text', required: false }])}>Add section</button>
-                <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => { set('fields', []); set('explicitEmptyFields', true); }}>Save empty field list</button>
+            <section className="space-y-4 border-2 border-[#F58220] bg-[#FFF6EE] p-4">
+              <div>
+                <h3 className="font-heading font-bold uppercase text-sm text-[#0B1F3D]">Download form</h3>
+                <p className="mt-1 text-xs text-[#0B1F3D]/80">These fields and checkboxes are what visitors see. Add a section or checkbox, then save.</p>
               </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={form.explicitEmptyFields && form.fields.length === 0} onChange={(e) => { set('explicitEmptyFields', e.target.checked); if (e.target.checked) set('fields', []); }} />
-                Explicitly saved an empty list (no Zip/Phone fallback)
-              </label>
 
-              <Field label="Email note">
-                <textarea className={inputClass} rows={2} value={form.emailNote} onChange={(e) => set('emailNote', e.target.value)} />
-              </Field>
-              <p className="text-xs text-foreground/70">
-                Click “Put {'{ }'}” then type the red words inside the braces. Example: I agree to the {'{Privacy Policy}'}.
-              </p>
-              {form.checks.map((check, i) => (
-                <CheckLinkRow
-                  key={i}
-                  check={check}
-                  onChange={(next) => {
-                    const checks = [...form.checks];
-                    checks[i] = next;
-                    set('checks', checks);
+              <div className="space-y-2">
+                <h4 className="font-heading text-xs font-bold uppercase">Download form sections</h4>
+                {form.fields.map((field, i) => {
+                  const used = new Set(form.fields.filter((_, n) => n !== i).map((row) => row.key));
+                  return (
+                    <div key={`${field.key}-${i}`} className="flex items-center gap-2">
+                      <select
+                        className={`${inputClass} min-w-0 flex-1`}
+                        value={field.key}
+                        onChange={(e) => {
+                          const option = DOWNLOAD_FIELD_OPTIONS.find((row) => row.key === e.target.value);
+                          if (!option) return;
+                          const fields = [...form.fields];
+                          fields[i] = { key: option.key, label: option.label, type: option.type, required: field.required !== false };
+                          set('fields', fields);
+                        }}
+                      >
+                        {DOWNLOAD_FIELD_OPTIONS.map((option) => (
+                          <option key={option.key} value={option.key} disabled={used.has(option.key)}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="flex shrink-0 items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={field.required !== false}
+                          onChange={(e) => {
+                            const fields = [...form.fields];
+                            fields[i] = { ...field, required: e.target.checked };
+                            set('fields', fields);
+                          }}
+                        />
+                        Required
+                      </label>
+                      <button type="button" className="shrink-0 text-xs underline" onClick={() => set('fields', form.fields.filter((_, n) => n !== i))}>Remove</button>
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  className="brutal-btn text-[10px] px-3 py-2"
+                  disabled={form.fields.length >= 12 || form.fields.length >= DOWNLOAD_FIELD_OPTIONS.length}
+                  onClick={() => {
+                    const used = new Set(form.fields.map((row) => row.key));
+                    const next = DOWNLOAD_FIELD_OPTIONS.find((option) => !used.has(option.key));
+                    if (!next || form.fields.length >= 12) return;
+                    set('fields', [...form.fields, { key: next.key, label: next.label, type: next.type, required: true }]);
                   }}
-                />
-              ))}
-              <Field label="Footer line">
-                <input className={inputClass} value={form.footerLine} onChange={(e) => set('footerLine', e.target.value)} />
-              </Field>
-              <div className="flex flex-wrap gap-3 text-xs">
-                <label className="inline-flex items-center gap-1"><input type="checkbox" checked={form.showEmailNote} onChange={(e) => set('showEmailNote', e.target.checked)} /> Email note</label>
-                <label className="inline-flex items-center gap-1"><input type="checkbox" checked={form.showChecks} onChange={(e) => set('showChecks', e.target.checked)} /> Checkboxes</label>
-                <label className="inline-flex items-center gap-1"><input type="checkbox" checked={form.showFooter} onChange={(e) => set('showFooter', e.target.checked)} /> Footer</label>
+                >
+                  Add section
+                </button>
               </div>
-              {form.extra.map((check, i) => (
-                <CheckLinkRow
-                  key={i}
-                  check={check}
-                  onChange={(next) => {
-                    const extra = [...form.extra];
-                    extra[i] = next;
-                    set('extra', extra);
-                  }}
-                  onRemove={() => set('extra', form.extra.filter((_, n) => n !== i))}
-                />
-              ))}
-              <button type="button" className="brutal-btn text-[10px] px-3 py-2" disabled={form.extra.length >= 8} onClick={() => set('extra', [...form.extra, { text: 'I agree to the {link text}.', href: '/privacy', required: false }])}>Add checkbox</button>
 
-              {form.questions.map((q, i) => (
-                <div key={i} className="space-y-1">
-                  <input className={inputClass} placeholder="Question" value={q.question} onChange={(e) => {
-                    const questions = [...form.questions]; questions[i] = { ...q, question: e.target.value }; set('questions', questions);
-                  }} />
-                  <textarea className={inputClass} rows={3} placeholder="One option per line. Two or more become a dropdown." value={q.optionsText} onChange={(e) => {
-                    const questions = [...form.questions]; questions[i] = { ...q, optionsText: e.target.value }; set('questions', questions);
-                  }} />
-                </div>
-              ))}
-              <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => set('questions', [...form.questions, { question: '', optionsText: '' }])}>Add question</button>
+              <div className="space-y-2">
+                <h4 className="font-heading text-xs font-bold uppercase">Download form consent text</h4>
+                <p className="text-xs text-[#0B1F3D]/70">
+                  {'{{terms}} Terms of Use, {{privacy}} Privacy Policy, {{privacy-statement}} privacy statement, {{unsubscribe}} unsubscribe, {{publisher}} '}
+                  {SITE_NAME}
+                  {'. **text** is bold.'}
+                </p>
+                <Field label="Email note">
+                  <textarea className={inputClass} rows={2} value={form.emailNote} onChange={(e) => set('emailNote', e.target.value)} />
+                </Field>
+                {['terms', 'partners', 'optOut'].map((key) => (
+                  <div key={key} className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="overline text-muted-foreground">
+                        {key === 'optOut' ? 'Opt-out checkbox (optional)' : key === 'terms' ? 'Terms checkbox' : 'Partners checkbox'}
+                      </span>
+                      <label className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={form[key].visible !== false}
+                          onChange={(e) => set(key, { ...form[key], visible: e.target.checked })}
+                        />
+                        Show
+                      </label>
+                    </div>
+                    <textarea className={inputClass} rows={3} value={form[key].text || ''} onChange={(e) => set(key, { ...form[key], text: e.target.value })} />
+                  </div>
+                ))}
+                <Field label="Line under Download Now">
+                  <input className={inputClass} value={form.footerLine} onChange={(e) => set('footerLine', e.target.value)} />
+                </Field>
+                {form.extra.map((check, i) => (
+                  <div key={i} className="space-y-1 border border-[#F58220]/40 bg-white p-2">
+                    <textarea className={inputClass} rows={2} value={check.text || ''} onChange={(e) => {
+                      const extra = [...form.extra];
+                      extra[i] = { ...check, text: e.target.value };
+                      set('extra', extra);
+                    }} />
+                    <div className="flex gap-3 text-xs">
+                      {/\bopt[\s-]*out\b/i.test(check.text || '') ? (
+                        <span>Optional</span>
+                      ) : (
+                        <label className="inline-flex items-center gap-1">
+                          <input type="checkbox" checked={!!check.required} onChange={(e) => {
+                            const extra = [...form.extra];
+                            extra[i] = { ...check, required: e.target.checked };
+                            set('extra', extra);
+                          }} />
+                          Required
+                        </label>
+                      )}
+                      <button type="button" className="underline" onClick={() => set('extra', form.extra.filter((_, n) => n !== i))}>Remove</button>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" className="brutal-btn text-[10px] px-3 py-2" disabled={form.extra.length >= 8} onClick={() => set('extra', [...form.extra, { text: '', required: false }])}>Add checkbox</button>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-heading text-xs font-bold uppercase">Download form questions</h4>
+                <p className="text-xs text-[#0B1F3D]/70">Every question is required on the public form.</p>
+                {form.questions.map((q, i) => (
+                  <div key={i} className="space-y-1">
+                    <input className={inputClass} placeholder="Question" value={q.question} onChange={(e) => {
+                      const questions = [...form.questions]; questions[i] = { ...q, question: e.target.value }; set('questions', questions);
+                    }} />
+                    <textarea className={inputClass} rows={3} placeholder="One option per line. Two or more become a dropdown." value={q.optionsText} onChange={(e) => {
+                      const questions = [...form.questions]; questions[i] = { ...q, optionsText: e.target.value }; set('questions', questions);
+                    }} />
+                    <button type="button" className="text-xs underline" onClick={() => set('questions', form.questions.filter((_, n) => n !== i))}>Remove</button>
+                  </div>
+                ))}
+                <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => set('questions', [...form.questions, { question: '', optionsText: '' }])}>Add question</button>
+              </div>
             </section>
 
-            <Field label="Title"><input required className={inputClass} value={form.title} onChange={(e) => set('title', e.target.value)} /></Field>
-            <Field label="Short description"><textarea className={inputClass} rows={2} value={form.description} onChange={(e) => set('description', e.target.value)} /></Field>
-            <Field label="Offered by"><input className={inputClass} value={form.offeredBy} onChange={(e) => set('offeredBy', e.target.value)} /></Field>
-            <Field label="Author"><input className={inputClass} value={form.author} onChange={(e) => set('author', e.target.value)} /></Field>
             <Field label="Category">
               <select required className={inputClass} value={form.category} onChange={(e) => set('category', e.target.value)}>
                 {UPLOAD_CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}
               </select>
             </Field>
             <Field label="Vertical">
-              <select required className={inputClass} value={form.vertical} onChange={(e) => set('vertical', e.target.value)}>
-                {VERTICALS.map((v) => <option key={v.slug} value={v.slug}>{v.label}</option>)}
-              </select>
+              <VerticalSelect value={form.vertical} onChange={(slug) => set('vertical', slug)} />
             </Field>
-            <Field label={editing ? 'Replace PDF' : 'PDF file'}>
+            <Field label={editing ? 'Replace PDF' : 'PDF'}>
               <input type="file" accept="application/pdf" required={!editing} onChange={(e) => setPdf(e.target.files?.[0] || null)} />
             </Field>
-            <Field label="Cover image">
-              <input type="file" accept="image/*" onChange={(e) => setCover(e.target.files?.[0] || null)} />
+            <Field label={editing?.cover_url ? 'Replace thumbnail' : 'Thumbnail'}>
+              <input type="file" accept="image/*" required={!editing?.cover_url} onChange={(e) => setCover(e.target.files?.[0] || null)} />
             </Field>
+
+            <div className="space-y-2">
+              <span className="overline text-muted-foreground">SEO mode</span>
+              <div className="flex gap-4 text-sm">
+                <label className="inline-flex items-center gap-2">
+                  <input type="radio" name="seoMode" checked={form.seoMode === 'claude'} onChange={() => set('seoMode', 'claude')} /> Claude
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input type="radio" name="seoMode" checked={form.seoMode !== 'claude'} onChange={() => set('seoMode', 'manual')} /> Manual
+                </label>
+              </div>
+            </div>
+
+            <Field label="Title"><input required className={inputClass} value={form.title} onChange={(e) => set('title', e.target.value)} /></Field>
+            <Field label="Description">
+              <textarea required maxLength={220} className={inputClass} rows={3} value={form.description} onChange={(e) => set('description', e.target.value)} />
+              <span className="mt-1 block font-mono text-[10px] text-muted-foreground">{form.description.length}/220</span>
+            </Field>
+            <Field label="Offered by"><input className={inputClass} value={form.offeredBy} onChange={(e) => set('offeredBy', e.target.value)} /></Field>
+            <Field label="Author"><input className={inputClass} value={form.author} onChange={(e) => set('author', e.target.value)} /></Field>
 
             <section className="space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="font-heading font-bold uppercase text-sm">SEO</h3>
-                  <p className="text-xs text-muted-foreground">Type these by hand, or fill them with Claude. Either way you can edit before save.</p>
+                  <p className="text-xs text-muted-foreground">
+                    {form.seoMode === 'claude'
+                      ? 'Generate with Claude, then edit before save. Nothing is published until you save.'
+                      : 'Type the SEO fields by hand. Nothing is generated on save.'}
+                  </p>
                 </div>
-                <button type="button" className="brutal-btn-primary text-[10px] px-3 py-2 shrink-0 shadow-brutal-sm" onClick={generateSeo} disabled={seoBusy || busy || !form.title}>
-                  {seoBusy ? 'Claude…' : 'Generate with Claude'}
-                </button>
+                {form.seoMode === 'claude' ? (
+                  <button type="button" className="shrink-0 bg-[#F58220] px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#e67410] disabled:opacity-50" onClick={generateSeo} disabled={seoBusy || busy || !form.title}>
+                    {seoBusy ? 'Claude…' : 'Generate with Claude'}
+                  </button>
+                ) : null}
               </div>
               {seoNote ? <p className="text-xs text-foreground/80">{seoNote}</p> : null}
               <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => set('slug', e.target.value)} /></Field>

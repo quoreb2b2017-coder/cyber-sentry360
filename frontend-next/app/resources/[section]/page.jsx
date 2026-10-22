@@ -12,6 +12,20 @@ export default async function ResourceSectionPage({ params }) {
   const section = sectionByPath(params.section);
   if (!section) notFound();
 
+  if (!section.category) {
+    return (
+      <PublicLayout>
+        <ResourceHero
+          badge={section.badge}
+          heading={section.heading}
+          paragraph={section.paragraph}
+          pillars={section.pillars}
+        />
+        <ComingSoon />
+      </PublicLayout>
+    );
+  }
+
   let items = [];
   try {
     items = await listResources({ category: section.category, status: 'published' });

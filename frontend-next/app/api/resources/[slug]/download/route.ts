@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { saveLeadSource } from '@/lib/lead-source';
+import { isPersonalEmail, publicConsent, publicStepFields } from '@/lib/resources';
 import { getAdminClient } from '@/lib/supabase/admin';
-import { getResourceBySlug, toPublicResource } from '@/lib/resources-data';
+import { getResourceBySlug } from '@/lib/resources-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,54 +10,19 @@ function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function isOptOutCheck(check: { text?: string; required?: boolean }) {
-  const text = String(check.text || '');
-  return check.required === false || /contact me|related research|marketing|opt out/i.test(text);
-}
-
-function optedIntoContact(checks: Array<{ text?: string; required?: boolean }>, consentIn: Record<string, unknown>) {
-  const optOuts = checks.filter(isOptOutCheck);
-  if (!optOuts.length) return false;
-  return optOuts.every((check) => !consentIn[String(check.text || '')]);
-}
-
-async function saveDownloadContact(
-  db: ReturnType<typeof getAdminClient>,
-  email: string,
-  checks: Array<{ text?: string; required?: boolean }>,
-  consentIn: Record<string, unknown>
-) {
+async function saveMarketing(db: ReturnType<typeof getAdminClient>, email: string, marketing: boolean) {
   const now = new Date().toISOString();
-  if (optedIntoContact(checks, consentIn)) {
+  if (marketing) {
     const { error } = await db.from('newsletter_subscribers').upsert(
       { email, status: 'subscribed', subscribed_at: now, unsubscribed_at: null },
       { onConflict: 'email' }
     );
     return error?.message || null;
   }
-
-  const { data: existing, error: readError } = await db
-    .from('newsletter_subscribers')
-    .select('status')
-    .eq('email', email)
-    .maybeSingle();
-  if (readError) return readError.message;
-  if (existing?.status === 'subscribed') return null;
-
-  if (!existing) {
-    const { error } = await db.from('newsletter_subscribers').insert({
-      email,
-      status: 'unsubscribed',
-      subscribed_at: now,
-      unsubscribed_at: now,
-    });
-    return error?.message || null;
-  }
-
-  const { error } = await db
-    .from('newsletter_subscribers')
-    .update({ status: 'unsubscribed', unsubscribed_at: now })
-    .eq('email', email);
+  const { error } = await db.from('newsletter_subscribers').upsert(
+    { email, status: 'unsubscribed', subscribed_at: now, unsubscribed_at: now },
+    { onConflict: 'email' }
+  );
   return error?.message || null;
 }
 
@@ -69,55 +35,67 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   const body = await request.json().catch(() => ({}));
   const email = String(body.email || '').toLowerCase().trim();
   if (!isEmail(email)) return NextResponse.json({ detail: 'Work email is required' }, { status: 400 });
+  if (isPersonalEmail(email)) {
+    return NextResponse.json(
+      { detail: 'Use a company email. Gmail, Yahoo, Outlook, Hotmail, iCloud, and other personal addresses are not accepted.' },
+      { status: 400 }
+    );
+  }
 
-  const publicItem = toPublicResource(item as Record<string, unknown>);
-  const form = publicItem.form_config as {
-    fields: Array<{ key: string; label: string; required?: boolean }>;
-    questions: Array<{ question: string; options?: string[] }>;
-    consent: { checks?: Array<{ text: string; required?: boolean; visible?: boolean }>; extra?: Array<{ text: string; required?: boolean }>; showChecks?: boolean };
-  };
-
-  const fieldsIn = body.fields && typeof body.fields === 'object' ? body.fields : {};
-  const answersIn = body.answers && typeof body.answers === 'object' ? body.answers : {};
-  const consentIn = body.consent && typeof body.consent === 'object' ? body.consent : {};
+  const formConfig = (item.form_config || {}) as Record<string, unknown>;
+  const stepFields = publicStepFields(formConfig);
+  const questions = Array.isArray(formConfig.questions) ? formConfig.questions as Array<{ question?: string }> : [];
+  const consent = publicConsent(formConfig);
+  const fieldsIn = body.fields && typeof body.fields === 'object' ? body.fields as Record<string, unknown> : {};
+  const answersIn = body.answers && typeof body.answers === 'object' ? body.answers as Record<string, unknown> : {};
+  const consentIn = body.consent && typeof body.consent === 'object' ? body.consent as Record<string, unknown> : {};
   const saveOnly = body.saveOnly === true;
 
+  const optedOut = consent.checks.some((check) => check.optOut && consentIn[check.id]);
+
   if (!saveOnly) {
-    for (const field of form.fields || []) {
-      if (!String(fieldsIn[field.key] || '').trim()) {
+    if (!String(fieldsIn.first_name || '').trim()) {
+      return NextResponse.json({ detail: 'First name is required' }, { status: 400 });
+    }
+    if (!String(fieldsIn.last_name || '').trim()) {
+      return NextResponse.json({ detail: 'Last name is required' }, { status: 400 });
+    }
+    for (const field of stepFields) {
+      if (field.required !== false && !String(fieldsIn[field.key] || '').trim()) {
         return NextResponse.json({ detail: `${field.label} is required` }, { status: 400 });
       }
     }
-
-    for (const question of form.questions || []) {
+    for (const question of questions) {
       if (question.question && !String(answersIn[question.question] || '').trim()) {
         return NextResponse.json({ detail: 'Answer every question before download' }, { status: 400 });
       }
     }
-  }
-
-  const visibleChecks = form.consent?.showChecks === false
-    ? []
-    : [...(form.consent?.checks || []), ...(form.consent?.extra || [])].filter(
-        (c) => c.text && (c as { visible?: boolean }).visible !== false
-      );
-  for (const check of visibleChecks) {
-    if (check.required !== false && !consentIn[check.text]) {
-      return NextResponse.json({ detail: 'Tick every required consent box before download' }, { status: 400 });
+    for (const check of consent.checks) {
+      if (check.optOut || !check.required) continue;
+      if (!consentIn[check.id]) {
+        return NextResponse.json({ detail: 'Tick every required consent box before download' }, { status: 400 });
+      }
     }
   }
 
   const db = getAdminClient();
-  const contactError = await saveDownloadContact(db, email, visibleChecks, consentIn);
-  if (contactError) return NextResponse.json({ detail: contactError }, { status: 500 });
-  const sourceError = await saveLeadSource(db, email, {
-    type: ['whitepaper', 'report', 'case_study', 'guide', 'webinar'].includes(String(item.category)) ? String(item.category) : 'whitepaper',
-    slug: String(item.slug || ''),
-    title: String(item.title || ''),
-  });
-  if (sourceError) return NextResponse.json({ detail: sourceError }, { status: 500 });
+  if (!saveOnly) {
+    const contactError = await saveMarketing(db, email, !optedOut);
+    if (contactError) return NextResponse.json({ detail: contactError }, { status: 500 });
+    const sourceError = await saveLeadSource(db, email, {
+      type: ['whitepaper', 'report', 'case_study', 'webinar'].includes(String(item.category)) ? String(item.category) : 'whitepaper',
+      slug: String(item.slug || ''),
+      title: String(item.title || ''),
+    });
+    if (sourceError) return NextResponse.json({ detail: sourceError }, { status: 500 });
+  }
 
-  const savedAnswers = { ...answersIn, _consent: consentIn };
+  const savedAnswers = {
+    ...answersIn,
+    _consent: consentIn,
+    _profileCompleted: !saveOnly,
+    _marketingConsent: saveOnly ? null : !optedOut,
+  };
   const leadId = String(body.leadId || '');
   let savedId = leadId;
 
@@ -148,7 +126,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   }
 
   if (saveOnly) {
-    return NextResponse.json({ ok: true, saved: true, id: savedId });
+    return NextResponse.json({ ok: true, saved: true, id: savedId, profileCompleted: false });
   }
 
   const pdf = await fetch(item.pdf_url);

@@ -134,6 +134,10 @@ export default function AdminLayout({ children }) {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    router.prefetch('/admin/newsletter');
+  }, [router]);
+
   const pageTitle = useMemo(() => {
     if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
     const match = Object.keys(PAGE_TITLES)

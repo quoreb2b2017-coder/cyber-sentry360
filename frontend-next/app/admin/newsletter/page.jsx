@@ -8,17 +8,19 @@ import { Trash2, Loader2 } from 'lucide-react';
 export default function AdminNewsletterPage() {
   const [items, setItems] = useState([]);
   const [downloads, setDownloads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingSubs, setLoadingSubs] = useState(true);
+  const [loadingDownloads, setLoadingDownloads] = useState(true);
   const [deleting, setDeleting] = useState(null);
 
   const load = () => {
-    setLoading(true);
-    Promise.all([api.get('/admin/newsletter'), api.get('/admin/downloads')])
-      .then(([subscribers, leads]) => {
-        setItems(subscribers.data.items || []);
-        setDownloads(leads.data.items || []);
-      })
-      .finally(() => setLoading(false));
+    setLoadingSubs(true);
+    setLoadingDownloads(true);
+    api.get('/admin/newsletter')
+      .then((subscribers) => setItems(subscribers.data.items || []))
+      .finally(() => setLoadingSubs(false));
+    api.get('/admin/downloads')
+      .then((leads) => setDownloads(leads.data.items || []))
+      .finally(() => setLoadingDownloads(false));
   };
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function AdminNewsletterPage() {
       window.clearTimeout(timer);
       window.removeEventListener('hashchange', scroll);
     };
-  }, [loading]);
+  }, [loadingSubs]);
 
   const active = items.filter((i) => i.status !== 'unsubscribed');
   const optedOut = items.length - active.length;
@@ -116,7 +118,7 @@ export default function AdminNewsletterPage() {
             <span>Date</span>
             <span className="text-right">Action</span>
           </div>
-          {loading ? (
+          {loadingSubs ? (
             <p className="p-6 font-mono text-sm text-muted-foreground">Loading…</p>
           ) : items.length === 0 ? (
             <p className="p-6 font-mono text-sm text-muted-foreground">No subscribers yet.</p>
@@ -171,7 +173,7 @@ export default function AdminNewsletterPage() {
               <span>Phone</span>
               <span className="text-right">Action</span>
             </div>
-            {loading ? (
+            {loadingDownloads ? (
               <p className="p-6 font-mono text-sm text-muted-foreground">Loading…</p>
             ) : downloads.length === 0 ? (
               <p className="p-6 font-mono text-sm text-muted-foreground">No downloads yet.</p>

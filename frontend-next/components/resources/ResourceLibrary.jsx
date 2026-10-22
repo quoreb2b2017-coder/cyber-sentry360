@@ -64,7 +64,7 @@ export default function ResourceLibrary({ items = [], hideCategoryFilter = true 
                   <h2 className="font-heading font-bold text-lg leading-snug">{item.title}</h2>
                   <div className="mt-auto grid grid-cols-2 gap-2">
                     <Link href={href} className="brutal-btn w-full text-[10px] px-2 py-2">View details</Link>
-                    <Link href={`${href}#download`} className="brutal-btn-primary w-full text-[10px] px-2 py-2">Download</Link>
+                    <Link href={`/download/${item.slug}`} className="brutal-btn-primary w-full text-[10px] px-2 py-2">Download</Link>
                   </div>
                 </div>
               </article>

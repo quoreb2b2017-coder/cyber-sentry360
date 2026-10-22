@@ -59,19 +59,25 @@ export async function POST(request: Request) {
   try {
     const form = await request.formData();
     const title = String(form.get('title') || '').trim();
+    const description = String(form.get('description') || '').trim();
     const category = String(form.get('category') || '');
     const vertical = String(form.get('vertical') || '');
     const pdf = form.get('pdf');
+    const cover = form.get('cover');
     if (!title) return NextResponse.json({ detail: 'Title is required' }, { status: 400 });
+    if (!description) return NextResponse.json({ detail: 'Description is required' }, { status: 400 });
+    if (description.length > 220) return NextResponse.json({ detail: 'Description must be 220 characters or fewer' }, { status: 400 });
     if (!isUploadCategory(category)) return NextResponse.json({ detail: 'Category is required' }, { status: 400 });
     if (!isVertical(vertical)) return NextResponse.json({ detail: 'Vertical is required' }, { status: 400 });
     if (!(pdf instanceof File) || pdf.size === 0) {
       return NextResponse.json({ detail: 'PDF file is required' }, { status: 400 });
     }
+    if (!(cover instanceof File) || cover.size === 0) {
+      return NextResponse.json({ detail: 'Thumbnail is required' }, { status: 400 });
+    }
 
     const pdfFile = await uploadFile(pdf, 'pdf');
-    const cover = form.get('cover');
-    const coverFile = cover instanceof File && cover.size > 0 ? await uploadFile(cover, 'covers') : null;
+    const coverFile = await uploadFile(cover, 'covers');
 
     let formConfig = {};
     try {
@@ -99,7 +105,7 @@ export async function POST(request: Request) {
 
     const row = {
       title,
-      description: String(form.get('description') || '').slice(0, 500),
+      description,
       offered_by: String(form.get('offeredBy') || SITE_NAME).slice(0, 120) || SITE_NAME,
       author: String(form.get('author') || '').slice(0, 120),
       category,
@@ -112,8 +118,8 @@ export async function POST(request: Request) {
       inside_sections: Array.isArray(inside) ? inside.slice(0, 8) : [],
       pdf_url: pdfFile.url,
       pdf_path: pdfFile.path,
-      cover_url: coverFile?.url || null,
-      cover_path: coverFile?.path || null,
+      cover_url: coverFile.url,
+      cover_path: coverFile.path,
       form_config: cleanFormConfig(formConfig),
       status: 'published',
     };
