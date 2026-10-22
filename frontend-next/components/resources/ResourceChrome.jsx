@@ -7,6 +7,8 @@ export function ResourceHero({ badge, heading, paragraph, pillars }) {
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-foreground to-primary" aria-hidden />
       <div className="max-w-[1100px] mx-auto px-5 pt-8 pb-8 grid grid-cols-1 lg:grid-cols-[1.4fr_0.8fr] gap-8 items-center">
         <div>
+
+        {/* gafu */}
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
             <Link href="/" className="hover:text-primary">Home</Link>
             <span className="mx-1.5">/</span>
