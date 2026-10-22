@@ -11,6 +11,7 @@ export default function AdminNewsletterPage() {
   const [loadingSubs, setLoadingSubs] = useState(true);
   const [loadingDownloads, setLoadingDownloads] = useState(true);
   const [deleting, setDeleting] = useState(null);
+  const [tab, setTab] = useState('subscribes');
 
   const load = () => {
     setLoadingSubs(true);
@@ -28,16 +29,17 @@ export default function AdminNewsletterPage() {
   }, []);
 
   useEffect(() => {
-    const scroll = () => {
-      if (window.location.hash === '#downloads') document.getElementById('downloads')?.scrollIntoView();
-    };
-    const timer = window.setTimeout(scroll, 50);
-    window.addEventListener('hashchange', scroll);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('hashchange', scroll);
-    };
-  }, [loadingSubs]);
+    const read = () => setTab(window.location.hash === '#downloads' ? 'downloads' : 'subscribes');
+    read();
+    window.addEventListener('hashchange', read);
+    return () => window.removeEventListener('hashchange', read);
+  }, []);
+
+  const showTab = (next) => {
+    const url = next === 'downloads' ? '/admin/newsletter#downloads' : '/admin/newsletter';
+    window.history.pushState(null, '', url);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  };
 
   const active = items.filter((i) => i.status !== 'unsubscribed');
   const optedOut = items.length - active.length;
@@ -99,15 +101,25 @@ export default function AdminNewsletterPage() {
       <div className="border-b-2 border-foreground pb-6 mb-8 flex items-end justify-between gap-4">
         <div>
           <div className="overline text-primary">Audience</div>
-          <h1 id="subscribes" className="font-heading font-black uppercase text-4xl md:text-5xl tracking-tighter scroll-mt-6">Subscribes</h1>
+          <h1 id="subscribes" className="font-heading font-black uppercase text-4xl md:text-5xl tracking-tighter scroll-mt-6">
+            {tab === 'downloads' ? 'Downloads' : 'Subscribes'}
+          </h1>
           <p className="mt-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
             {active.length} subscribed · {optedOut} opt out · {downloads.length} downloads
           </p>
         </div>
-        <button onClick={csv} disabled={!items.length} className="brutal-btn-primary" data-testid="newsletter-export">
-          Export CSV
-        </button>
+        {tab === 'subscribes' ? (
+          <button onClick={csv} disabled={!items.length} className="brutal-btn-primary" data-testid="newsletter-export">
+            Export CSV
+          </button>
+        ) : null}
       </div>
+      <div className="mb-4 flex gap-2" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === 'subscribes'} className={tab === 'subscribes' ? 'brutal-btn-primary text-[10px]' : 'brutal-btn text-[10px]'} onClick={() => showTab('subscribes')}>Subscribes</button>
+        <button type="button" role="tab" aria-selected={tab === 'downloads'} className={tab === 'downloads' ? 'brutal-btn-primary text-[10px]' : 'brutal-btn text-[10px]'} onClick={() => showTab('downloads')}>Downloads</button>
+      </div>
+      {tab === 'subscribes' ? (
+      <>
       <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Scroll → to read the full email and paper</p>
       <div className="brutal-border bg-card overflow-auto max-h-[420px]" tabIndex={0} aria-label="Subscribes, scroll to read each row">
         <div className="min-w-[880px]">
@@ -160,7 +172,9 @@ export default function AdminNewsletterPage() {
         </div>
       </div>
 
-      <div id="downloads" className="mt-10 scroll-mt-6">
+      </>
+      ) : (
+      <div id="downloads" className="scroll-mt-6">
         <h2 className="font-heading font-black uppercase text-2xl tracking-tighter mb-3">White paper downloads</h2>
         <p className="mb-2 text-sm text-muted-foreground">Who downloaded which white paper. Scroll inside the table to read the full paper, zip, and phone.</p>
         <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Scroll →</p>
@@ -201,6 +215,7 @@ export default function AdminNewsletterPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -76,7 +76,7 @@ function cleanFormConfig(input: unknown) {
   const consentIn = src.consent && typeof src.consent === 'object' ? (src.consent as Record<string, unknown>) : {};
   const modern = consentIn.terms || consentIn.partners || consentIn.optOut;
   const extra = Array.isArray(consentIn.extra) ? consentIn.extra.slice(0, 8) : [];
-  const questions = Array.isArray(src.questions) ? src.questions.slice(0, 8) : [];
+  const questions = Array.isArray(src.questions) ? src.questions.slice(0, 20) : [];
 
   return {
     fields,
@@ -97,13 +97,10 @@ function cleanFormConfig(input: unknown) {
     },
     questions: questions.map((q) => {
       const row = q && typeof q === 'object' ? (q as Record<string, unknown>) : {};
-      const options = Array.isArray(row.options)
-        ? row.options.map((o) => String(o).trim()).filter(Boolean).slice(0, 12)
-        : String(row.optionsText || '')
-            .split('\n')
-            .map((o) => o.trim())
-            .filter(Boolean)
-            .slice(0, 12);
+      const options = (Array.isArray(row.options) ? row.options : String(row.optionsText || '').split('\n'))
+        .map((o) => String(o).trim())
+        .filter(Boolean)
+        .slice(0, 20);
       return { question: String(row.question || '').slice(0, 200), options };
     }).filter((q) => q.question),
   };

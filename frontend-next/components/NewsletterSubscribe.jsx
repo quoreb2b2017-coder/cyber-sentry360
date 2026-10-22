@@ -151,13 +151,13 @@ export function NewsletterSubscribe({
   return (
     <div className="brutal-border bg-card w-full min-w-0 max-w-full overflow-x-hidden" data-testid={`${testid}-box`}>
       <div className="border-b-2 border-foreground px-3 py-2 bg-muted">
-        <div className="overline text-primary text-[9px] inline-flex items-center gap-1.5">
-          <Mail className="w-3 h-3 shrink-0" />
+        <div className="inline-flex items-center gap-1.5 font-heading text-sm font-black uppercase tracking-wide text-primary">
+          <Mail className="w-4 h-4 shrink-0" />
           {subscribed ? 'Subscribed' : 'Subscribe now'}
         </div>
       </div>
       <div className="p-3 space-y-2.5 min-w-0 overflow-x-hidden">
-        <p className="font-serif italic text-sm text-foreground/85 leading-snug">
+        <p className="font-heading text-[15px] font-black leading-snug text-foreground">
           One Tuesday brief. Zero fluff. For CISOs &amp; builders.
         </p>
         <form onSubmit={subscribe} className="space-y-2 w-full min-w-0 max-w-full overflow-x-hidden">

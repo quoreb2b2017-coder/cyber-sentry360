@@ -171,7 +171,10 @@ export default function AdminWhitePapersPage() {
       optOut: modern ? { ...CONSENT.optOut, ...consent.optOut } : { ...CONSENT.optOut },
       extra: modern ? (consent.extra || []) : [],
       footerLine: modern ? (consent.footerLine ?? CONSENT.footerLine) : CONSENT.footerLine,
-      questions: (cfg.questions || []).map((q) => ({ question: q.question, optionsText: (q.options || []).join('\n') })),
+      questions: (cfg.questions || []).slice(0, 20).map((q) => ({
+        question: q.question || '',
+        options: Array.isArray(q.options) && q.options.length ? q.options.map((option) => String(option)) : [''],
+      })),
       seoMode: 'manual',
     });
     setPdf(null);
@@ -240,9 +243,9 @@ export default function AdminWhitePapersPage() {
           extra: form.extra.slice(0, 8),
           footerLine: form.footerLine,
         },
-        questions: form.questions.filter((q) => q.question).map((q) => ({
-          question: q.question,
-          options: String(q.optionsText || '').split('\n').map((o) => o.trim()).filter(Boolean),
+        questions: form.questions.filter((q) => q.question.trim()).slice(0, 20).map((q) => ({
+          question: q.question.trim(),
+          options: (q.options || []).map((option) => String(option).trim()).filter(Boolean).slice(0, 20),
         })),
       }));
       if (pdf) body.set('pdf', pdf);
@@ -438,21 +441,92 @@ export default function AdminWhitePapersPage() {
                 <button type="button" className="brutal-btn text-[10px] px-3 py-2" disabled={form.extra.length >= 8} onClick={() => set('extra', [...form.extra, { text: '', required: false }])}>Add checkbox</button>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-heading text-xs font-bold uppercase">Download form questions</h4>
-                <p className="text-xs text-[#0B1F3D]/70">Every question is required on the public form.</p>
-                {form.questions.map((q, i) => (
-                  <div key={i} className="space-y-1">
-                    <input className={inputClass} placeholder="Question" value={q.question} onChange={(e) => {
-                      const questions = [...form.questions]; questions[i] = { ...q, question: e.target.value }; set('questions', questions);
-                    }} />
-                    <textarea className={inputClass} rows={3} placeholder="One option per line. Two or more become a dropdown." value={q.optionsText} onChange={(e) => {
-                      const questions = [...form.questions]; questions[i] = { ...q, optionsText: e.target.value }; set('questions', questions);
-                    }} />
-                    <button type="button" className="text-xs underline" onClick={() => set('questions', form.questions.filter((_, n) => n !== i))}>Remove</button>
-                  </div>
-                ))}
-                <button type="button" className="brutal-btn text-[10px] px-3 py-2" onClick={() => set('questions', [...form.questions, { question: '', optionsText: '' }])}>Add question</button>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="font-heading text-sm font-bold">Download form questions</h4>
+                  <button
+                    type="button"
+                    className="rounded-full border border-[#0B1F3D]/15 bg-white px-3 py-1 text-xs font-semibold text-[#0B1F3D] disabled:opacity-40"
+                    disabled={form.questions.length >= 20}
+                    onClick={() => set('questions', [...form.questions, { question: '', options: [''] }])}
+                  >
+                    + Add
+                  </button>
+                </div>
+                <p className="text-xs leading-relaxed text-[#0B1F3D]/70">
+                  Optional. Each question appears on the public download form. Add 2+ options to show a dropdown; leave options empty for a text field (max 20 questions).
+                </p>
+                {form.questions.map((q, i) => {
+                  const filledOptions = (q.options || []).map((option) => String(option).trim()).filter(Boolean);
+                  return (
+                    <div key={i} className="space-y-3 rounded-xl border border-[#0B1F3D]/10 bg-white p-3">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#0B1F3D]/10 bg-[#f3f3f3] text-xs font-semibold text-[#0B1F3D]/70">{i + 1}</span>
+                        <input
+                          className="min-w-0 flex-1 rounded-lg border border-[#0B1F3D]/15 bg-white px-3 py-2 text-sm"
+                          placeholder="e.g. What is your fleet size?"
+                          value={q.question}
+                          onChange={(e) => {
+                            const questions = [...form.questions];
+                            questions[i] = { ...q, question: e.target.value };
+                            set('questions', questions);
+                          }}
+                        />
+                        <button type="button" className="px-1 text-lg leading-none text-[#0B1F3D]/50" aria-label="Remove question" onClick={() => set('questions', form.questions.filter((_, n) => n !== i))}>×</button>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 pl-9">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-[#0B1F3D]/70">Dropdown options (optional)</span>
+                        <button
+                          type="button"
+                          className="text-xs font-semibold text-[#2457d6] disabled:opacity-40"
+                          disabled={(q.options || []).length >= 20}
+                          onClick={() => {
+                            const questions = [...form.questions];
+                            questions[i] = { ...q, options: [...(q.options || []), ''] };
+                            set('questions', questions);
+                          }}
+                        >
+                          + Add option
+                        </button>
+                      </div>
+                      <div className="space-y-2 pl-9">
+                        {(q.options || []).map((option, n) => (
+                          <div key={n} className="flex items-center gap-2">
+                            <span className="w-5 shrink-0 text-xs text-[#0B1F3D]/50">{n + 1}.</span>
+                            <input
+                              className="min-w-0 flex-1 rounded-lg border border-[#0B1F3D]/15 bg-white px-3 py-2 text-sm"
+                              placeholder="e.g. 1–10 vehicles"
+                              value={option}
+                              onChange={(e) => {
+                                const options = [...(q.options || [])];
+                                options[n] = e.target.value;
+                                const questions = [...form.questions];
+                                questions[i] = { ...q, options };
+                                set('questions', questions);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="px-1 text-lg leading-none text-[#0B1F3D]/50"
+                              aria-label="Remove option"
+                              onClick={() => {
+                                const options = (q.options || []).filter((_, index) => index !== n);
+                                const questions = [...form.questions];
+                                questions[i] = { ...q, options };
+                                set('questions', questions);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {filledOptions.length === 1 ? (
+                          <p className="text-xs text-[#F58220]">Add one more option to enable dropdown on the public form.</p>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 

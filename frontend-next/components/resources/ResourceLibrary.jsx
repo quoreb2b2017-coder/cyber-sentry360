@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ResourceShare } from '@/components/resources/ResourceSummary';
 import { VERTICALS, sectionByCategory, verticalLabel } from '@/lib/resources';
 
 export default function ResourceLibrary({ items = [], hideCategoryFilter = true }) {
@@ -50,21 +51,28 @@ export default function ResourceLibrary({ items = [], hideCategoryFilter = true 
             const href = section?.path ? `${section.path}/${item.slug}` : `/resources/whitepapers/${item.slug}`;
             return (
               <article key={item.id} className="brutal-border bg-card flex flex-col">
-                <div className="border-b-2 border-foreground bg-muted">
+                <div className="group relative border-b-2 border-foreground bg-card">
                   {item.cover_url ? (
-                    <img src={item.cover_url} alt="" className="w-full h-auto object-contain" />
+                    <img src={item.cover_url} alt="" className="block w-full h-auto" />
                   ) : (
-                    <div className="w-full h-full flex items-end p-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                    <div className="flex h-[120px] w-full items-end p-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
                       {verticalLabel(item.vertical)}
                     </div>
                   )}
+                  <div className="absolute inset-0 hidden items-center justify-center bg-[#0B1F3D]/55 p-4 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto sm:flex">
+                    <div className="grid w-full max-w-[260px] grid-cols-2 gap-2">
+                      <Link href={href} className="brutal-btn w-full text-[10px] px-2 py-2 hover:bg-foreground hover:text-background">View details</Link>
+                      <Link href={`${href}#download`} className="brutal-btn-primary w-full text-[10px] px-2 py-2">Download</Link>
+                    </div>
+                  </div>
                 </div>
                 <div className="p-4 flex flex-col gap-3 flex-1">
                   <div className="overline text-primary">{verticalLabel(item.vertical)}</div>
                   <h2 className="font-heading font-bold text-lg leading-snug">{item.title}</h2>
-                  <div className="mt-auto grid grid-cols-2 gap-2">
+                  <ResourceShare title={item.title} href={href} />
+                  <div className="grid grid-cols-2 gap-2 sm:hidden">
                     <Link href={href} className="brutal-btn w-full text-[10px] px-2 py-2">View details</Link>
-                    <Link href={`/download/${item.slug}`} className="brutal-btn-primary w-full text-[10px] px-2 py-2">Download</Link>
+                    <Link href={`${href}#download`} className="brutal-btn-primary w-full text-[10px] px-2 py-2">Download</Link>
                   </div>
                 </div>
               </article>

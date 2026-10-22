@@ -138,7 +138,7 @@ export default function PublicLayout({ children, tickerItems }) {
             <span className="text-primary font-heading font-black text-xl md:text-2xl">360</span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1 font-mono text-[11px] uppercase tracking-widest relative z-10" data-testid="main-nav">
+          <nav className="hidden lg:flex items-center gap-1 font-mono text-[12px] font-bold uppercase tracking-widest relative z-10" data-testid="main-nav">
             <Link
               href="/"
               prefetch
@@ -171,7 +171,7 @@ export default function PublicLayout({ children, tickerItems }) {
               </Link>
               <div className="absolute right-0 top-full hidden group-hover:block group-focus-within:block bg-background border-2 border-foreground min-w-[190px] z-50">
                 {RESOURCE_MENU.map((item) => (
-                  <Link key={item.key} href={item.href} className="block px-3 py-2 hover:bg-muted hover:text-primary whitespace-nowrap">
+                  <Link key={item.key} href={item.href} className="block px-3 py-2 font-bold hover:bg-muted hover:text-primary whitespace-nowrap">
                     {item.label}
                   </Link>
                 ))}
@@ -203,29 +203,29 @@ export default function PublicLayout({ children, tickerItems }) {
         {mobileOpen && (
           <div className="lg:hidden border-t-2 border-foreground bg-background">
             <nav className="max-w-[1200px] mx-auto px-5 py-3 grid grid-cols-2 gap-1" data-testid="mobile-nav">
-              <Link href="/" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
+              <Link href="/" className="px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-muted hover:text-primary">
                 Home
               </Link>
               {NAV.map((c) => (
                 <Link
                   key={c.slug}
                   href={`/category/${c.slug}`}
-                  className={`px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary ${
+                  className={`px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-muted hover:text-primary ${
                     pathname === `/category/${c.slug}` ? 'text-primary bg-muted' : ''
                   }`}
                 >
                   {c.name}
                 </Link>
               ))}
-              <Link href="/resources" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
+              <Link href="/resources" className="px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-muted hover:text-primary">
                 Resources
               </Link>
               {RESOURCE_MENU.map((item) => (
-                <Link key={item.key} href={item.href} className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary">
+                <Link key={item.key} href={item.href} className="px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-muted hover:text-primary">
                   {item.label}
                 </Link>
               ))}
-              <Link href="/search" className="px-3 py-2.5 font-mono text-xs uppercase tracking-widest hover:bg-muted hover:text-primary col-span-2 border-t border-muted mt-1 pt-3">
+              <Link href="/search" className="px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-muted hover:text-primary col-span-2 border-t border-muted mt-1 pt-3">
                 Search archive
               </Link>
             </nav>

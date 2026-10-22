@@ -190,7 +190,8 @@ export default function DownloadForm({ resource }) {
         {error ? <p className="text-sm text-[#F58220]">{error}</p> : null}
         <div className="text-center">
           <button type="submit" disabled={busy} className={orangeBtn}>
-            {busy ? 'Saving…' : 'Continue'}
+            <Download className="h-4 w-4" aria-hidden />
+            {busy ? 'Saving…' : 'Download'}
           </button>
         </div>
       </form>

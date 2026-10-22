@@ -77,16 +77,7 @@ function isActive(pathname, item) {
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
 
-function SidebarNav({ pathname, onNavigate }) {
-  const [hash, setHash] = useState('');
-
-  useEffect(() => {
-    const read = () => setHash(window.location.hash);
-    read();
-    window.addEventListener('hashchange', read);
-    return () => window.removeEventListener('hashchange', read);
-  }, [pathname]);
-
+function SidebarNav({ pathname, hash, onNavigate }) {
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
       {NAV_GROUPS.map((group) => (
@@ -103,7 +94,14 @@ function SidebarNav({ pathname, onNavigate }) {
                 <li key={l.to}>
                   <Link
                     href={l.to}
-                    onClick={onNavigate}
+                    onClick={(event) => {
+                      onNavigate();
+                      if (l.hash == null || pathname !== '/admin/newsletter') return;
+                      event.preventDefault();
+                      const next = l.hash ? `/admin/newsletter${l.hash}` : '/admin/newsletter';
+                      window.history.pushState(null, '', next);
+                      window.dispatchEvent(new HashChangeEvent('hashchange'));
+                    }}
                     className={`flex items-center gap-2.5 px-3 py-2 font-mono text-[11px] uppercase tracking-wider transition-colors border-l-2 ${
                       active
                         ? 'border-primary bg-primary/15 text-primary'
@@ -129,9 +127,17 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hash, setHash] = useState('');
 
   useEffect(() => {
     setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const read = () => setHash(window.location.hash);
+    read();
+    window.addEventListener('hashchange', read);
+    return () => window.removeEventListener('hashchange', read);
   }, [pathname]);
 
   useEffect(() => {
@@ -139,12 +145,13 @@ export default function AdminLayout({ children }) {
   }, [router]);
 
   const pageTitle = useMemo(() => {
+    if (pathname === '/admin/newsletter' && hash === '#downloads') return 'Downloads';
     if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
     const match = Object.keys(PAGE_TITLES)
       .filter((k) => k !== '/admin' && pathname.startsWith(k))
       .sort((a, b) => b.length - a.length)[0];
     return PAGE_TITLES[match] || 'Admin';
-  }, [pathname]);
+  }, [pathname, hash]);
 
   const doLogout = async () => {
     await logout();
@@ -165,7 +172,7 @@ export default function AdminLayout({ children }) {
         </span>
       </div>
 
-      <SidebarNav pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+      <SidebarNav pathname={pathname} hash={hash} onNavigate={() => setMobileOpen(false)} />
 
       <div className="p-3 border-t border-background/15 shrink-0 space-y-2">
         <div className="flex items-center gap-2.5 px-2 py-1.5">
